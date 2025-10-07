@@ -86,21 +86,24 @@ window.Menu = {
             this.toggleSidebarCollapse();
         });
         
-        // User dropdown toggle - custom implementation for reliability
-        $(document).on('click', '[data-bs-toggle="dropdown"]', (e) => {
+        // User dropdown toggle - use custom class instead of Bootstrap data attribute
+        $(document).on('click', '.user-dropdown-trigger', (e) => {
             e.preventDefault();
             const $trigger = $(e.currentTarget);
-            const $dropdown = $trigger.next('.dropdown-menu');
+            const targetSelector = $trigger.attr('data-dropdown-target');
+            const $dropdown = $trigger.next(targetSelector);
             
-            Utils.log('Dropdown toggle clicked:', $trigger.attr('id'));
+            Utils.log('User dropdown toggle clicked:', $trigger.attr('id'));
+            Utils.log('Target selector:', targetSelector);
             
             if ($dropdown.length === 0) {
-                Utils.log('Dropdown menu not found');
+                Utils.log('Dropdown menu not found for selector:', targetSelector);
                 return;
             }
             
             // Close other dropdowns first
             $('.dropdown-menu.show').not($dropdown).removeClass('show');
+            $('.user-dropdown-trigger').not($trigger).attr('aria-expanded', 'false');
             
             // Toggle current dropdown
             const isCurrentlyOpen = $dropdown.hasClass('show');
@@ -121,7 +124,7 @@ window.Menu = {
         $(document).on('click', (e) => {
             if (!$(e.target).closest('.dropdown').length) {
                 $('.dropdown-menu.show').removeClass('show');
-                $('[data-bs-toggle="dropdown"]').attr('aria-expanded', 'false');
+                $('.user-dropdown-trigger').attr('aria-expanded', 'false');
             }
         });
     },
