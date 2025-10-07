@@ -164,6 +164,15 @@ body {
     display: none;
 }
 
+/* Submenu Toggle Animation */
+.submenu-toggle {
+    transition: transform 0.3s ease;
+}
+
+.submenu-toggle.rotate-90 {
+    transform: rotate(90deg);
+}
+
 /* Main Content */
 .main-content {
     background-color: #f8f9fa;

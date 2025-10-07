@@ -107,15 +107,14 @@ window.Menu = {
         
         rootItems.forEach((item) => {
             const $menuItem = this.createMenuItem(item);
+            $menuContainer.append($menuItem);
             
             // Find child items
             const children = childItems.filter(child => child.parent_id === item.id);
             if (children.length > 0) {
                 const $submenu = this.createSubmenu(item.id, children);
-                $menuItem.append($submenu);
+                $menuContainer.append($submenu);
             }
-            
-            $menuContainer.append($menuItem);
         });
         
         // Initialize tooltips for collapsed sidebar
@@ -179,7 +178,13 @@ window.Menu = {
      * Create submenu element
      */
     createSubmenu: function(parentId, children) {
-        const $submenu = $(`<div class="collapse" id="submenu-${parentId}"><ul class="nav flex-column ms-3"></ul></div>`);
+        const $submenu = $(`
+            <li class="nav-item">
+                <div class="collapse" id="submenu-${parentId}">
+                    <ul class="nav flex-column ms-3 nav-submenu"></ul>
+                </div>
+            </li>
+        `);
         const $submenuList = $submenu.find('ul');
         
         children.forEach((child) => {
