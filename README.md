@@ -225,7 +225,8 @@ chmod 600 .env
    - **⚠️ Change these credentials immediately after first login!**
 
 3. **Test API Documentation**:
-   - Visit `/docs/api/` for Swagger API documentation
+   - Visit `/api/docs` or `/backend/api/docs` for Swagger API documentation
+   - OpenAPI specification available at `/api/openapi.json`
 
 ## 🔧 Configuration
 
@@ -302,26 +303,27 @@ DB_PATH=database/oneteam.db
 
 The application provides a RESTful API documented with Swagger:
 
-- **API Base URL**: `/api/v1/`
+- **API Base URL**: `/api/`
 - **Authentication**: JWT tokens
-- **Documentation**: `/docs/api/`
+- **Documentation**: `/api/docs` (Interactive Swagger UI)
+- **OpenAPI Spec**: `/api/openapi.json`
 
 Example API calls:
 
 ```javascript
 // Login
-POST /api/v1/auth/login
+POST /api/auth/login
 {
     "username": "admin",
     "password": "admin123"
 }
 
 // Get user workspaces
-GET /api/v1/workspaces
+GET /api/workspaces
 Authorization: Bearer your-jwt-token
 
 // Load menu for workspace
-GET /api/v1/menu?workspace_id=1
+GET /api/menu?workspace_id=1
 Authorization: Bearer your-jwt-token
 ```
 

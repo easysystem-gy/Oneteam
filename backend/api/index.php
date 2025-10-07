@@ -68,6 +68,26 @@ switch ($endpoint) {
         handleUsers($action, $method, $input);
         break;
         
+    case 'docs':
+    case 'api':
+        // Handle API documentation
+        if ($action === 'openapi.json' || $endpoint === 'openapi.json') {
+            header('Content-Type: application/json');
+            include 'openapi.php';
+            exit();
+        } else {
+            // Serve Swagger UI
+            include 'docs.php';
+            exit();
+        }
+        break;
+        
+    case 'openapi.json':
+        header('Content-Type: application/json');
+        include 'openapi.php';
+        exit();
+        break;
+        
     default:
         errorResponse('Endpoint not found', 404);
 }

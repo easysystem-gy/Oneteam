@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# Handle API documentation routes
+RewriteRule ^docs/?$ index.php?endpoint=docs [L,QSA]
+RewriteRule ^docs/api/?$ index.php?endpoint=docs [L,QSA]
+RewriteRule ^openapi\.json$ index.php?endpoint=openapi.json [L,QSA]
+
+# Handle all other API routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L,QSA]
