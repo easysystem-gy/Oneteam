@@ -227,7 +227,7 @@ window.Menu = {
      * Load module content
      */
     loadModuleContent: function(moduleId) {
-        const $mainContent = $('#main-content');
+        const $mainContent = $('#content-area');
         
         // Show loading
         $mainContent.html(`
@@ -249,7 +249,7 @@ window.Menu = {
      * Render module content
      */
     renderModuleContent: function(moduleId) {
-        const $mainContent = $('#main-content');
+        const $mainContent = $('#content-area');
         
         // Generate content based on module
         let content = '';

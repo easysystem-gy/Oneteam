@@ -158,7 +158,7 @@ window.Workspace = {
             }
             
             // Clear main content
-            $('#main-content').empty().html('<div class="text-center p-5"><h4>Welcome to ' + workspace.name + '</h4><p class="text-muted">Select a menu item to get started.</p></div>');
+            $('#content-area').empty().html('<div class="text-center p-5"><h4>Welcome to ' + workspace.name + '</h4><p class="text-muted">Select a menu item to get started.</p></div>');
             
             Utils.hideLoading();
             Utils.showAlert('Switched to ' + workspace.name, 'success');
