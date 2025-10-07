@@ -6,15 +6,38 @@ Header always set X-Frame-Options SAMEORIGIN
 Header always set X-XSS-Protection "1; mode=block"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
+# Set proper MIME types for static assets
+<FilesMatch "\.(css)$">
+    Header set Content-Type "text/css"
+</FilesMatch>
+
+<FilesMatch "\.(js)$">
+    Header set Content-Type "application/javascript"
+</FilesMatch>
+
+<FilesMatch "\.(json)$">
+    Header set Content-Type "application/json"
+</FilesMatch>
+
+# Serve static assets directly - don't rewrite if file exists
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(frontend/assets/|assets/) - [L]
+
+# Fallback for static assets that might not be served correctly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} ^/(frontend/assets/|assets/)
+RewriteRule ^(.*)$ assets.php [QSA,L]
+
 # API Routes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^api/(.*)$ backend/api/index.php/$1 [QSA,L]
 
-# Frontend Routes (SPA)
+# Frontend Routes (SPA) - only if not a static file
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/(api|backend|frontend|docs|install)
+RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$
 RewriteRule ^.*$ frontend/index.html [QSA,L]
 
 # Deny access to sensitive files
