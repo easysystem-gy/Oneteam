@@ -41,11 +41,15 @@ window.Menu = {
             const $link = $(e.currentTarget);
             const $icon = $link.find('.submenu-toggle');
             
-            // Toggle icon rotation
+            Utils.log('Submenu toggle clicked:', $link.attr('href'));
+            
+            // Don't prevent default - let Bootstrap handle the collapse
+            // Toggle icon rotation after Bootstrap processes the event
             setTimeout(() => {
                 const isExpanded = $link.attr('aria-expanded') === 'true';
+                Utils.log('Submenu expanded state:', isExpanded);
                 $icon.toggleClass('rotate-90', isExpanded);
-            }, 10);
+            }, 100); // Increased timeout to ensure Bootstrap has processed
         });
         
         // Menu toggle button (mobile)
@@ -119,6 +123,9 @@ window.Menu = {
         
         // Initialize tooltips for collapsed sidebar
         this.initializeTooltips();
+        
+        // Initialize Bootstrap collapse components
+        this.initializeCollapseComponents();
     },
     
     /**
@@ -510,6 +517,32 @@ window.Menu = {
         } else {
             $('.nav-link').removeAttr('data-bs-toggle data-bs-placement');
         }
+    },
+    
+    /**
+     * Initialize Bootstrap collapse components
+     */
+    initializeCollapseComponents: function() {
+        Utils.log('Initializing Bootstrap collapse components');
+        
+        // Find all collapse triggers and ensure they're properly initialized
+        $('[data-bs-toggle="collapse"]').each(function() {
+            const $trigger = $(this);
+            const targetId = $trigger.attr('href') || $trigger.attr('data-bs-target');
+            const $target = $(targetId);
+            
+            if ($target.length > 0) {
+                Utils.log('Found collapse trigger:', targetId);
+                
+                // Ensure Bootstrap collapse is initialized
+                if (!$target.data('bs.collapse')) {
+                    Utils.log('Initializing collapse for:', targetId);
+                    new bootstrap.Collapse($target[0], {
+                        toggle: false
+                    });
+                }
+            }
+        });
     },
     
     /**
