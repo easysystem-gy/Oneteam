@@ -32,6 +32,16 @@ const App = {
             Auth.init();
         }
         
+        // Initialize Menu module
+        if (window.Menu) {
+            Menu.init();
+        }
+        
+        // Initialize Workspace module
+        if (window.Workspace) {
+            Workspace.init();
+        }
+        
         // Initialize event listeners
         this.initializeEventListeners();
         

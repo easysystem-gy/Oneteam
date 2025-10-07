@@ -82,6 +82,11 @@ window.Auth = {
                     Utils.setToken(response.data.token);
                     Utils.setCurrentUser(response.data.user);
                     
+                    // Store workspace data if provided
+                    if (response.data.workspace) {
+                        Utils.setCurrentWorkspace(response.data.workspace);
+                    }
+                    
                     // Show success message
                     Utils.showAlert('Login successful! Welcome back.', 'success');
                     

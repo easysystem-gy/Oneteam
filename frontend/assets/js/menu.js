@@ -96,7 +96,7 @@ window.Menu = {
      * Render menu in sidebar
      */
     renderMenu: function() {
-        const $menuContainer = $('#sidebar-menu');
+        const $menuContainer = $('#main-menu');
         if ($menuContainer.length === 0) return;
         
         $menuContainer.empty();

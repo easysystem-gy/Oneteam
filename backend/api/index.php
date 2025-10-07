@@ -120,12 +120,26 @@ function handleAuth($action, $method, $input) {
             jsonResponse([
                 'success' => true,
                 'data' => [
-                    'id' => 1,
-                    'username' => 'admin',
-                    'email' => 'admin@oneteam.local',
-                    'first_name' => 'System',
-                    'last_name' => 'Administrator',
-                    'is_admin' => true
+                    'token' => 'demo-jwt-token-' . time(),
+                    'user' => [
+                        'id' => 1,
+                        'username' => 'admin',
+                        'email' => 'admin@oneteam.local',
+                        'first_name' => 'System',
+                        'last_name' => 'Administrator',
+                        'is_admin' => true
+                    ],
+                    'workspace' => [
+                        'id' => 1,
+                        'uuid' => 'workspace-uuid-123456',
+                        'name' => 'Default Workspace',
+                        'description' => 'Default workspace for all users',
+                        'color' => '#0d6efd',
+                        'icon' => 'fas fa-home',
+                        'is_active' => true,
+                        'created_at' => '2024-01-01 00:00:00',
+                        'updated_at' => '2024-01-01 00:00:00'
+                    ]
                 ]
             ]);
             break;
