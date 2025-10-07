@@ -27,6 +27,11 @@ const App = {
 
     // Initialize application components
     initializeComponents: function() {
+        // Initialize Auth module
+        if (window.Auth) {
+            Auth.init();
+        }
+        
         // Initialize event listeners
         this.initializeEventListeners();
         
@@ -45,7 +50,7 @@ const App = {
         // Login form submission
         $('#login-form').on('submit', (e) => {
             e.preventDefault();
-            Auth.login();
+            Auth.handleLogin();
         });
 
         // Window resize handler
@@ -86,14 +91,14 @@ const App = {
 
     // Check authentication status
     checkAuthStatus: function() {
-        const token = Auth.getToken();
-        const user = Auth.getUser();
+        const token = Utils.getToken();
+        const user = Utils.getCurrentUser();
         
         if (token && user) {
             // Validate token with server
-            Auth.validateToken()
-                .then((isValid) => {
-                    if (isValid) {
+            Auth.validateToken(token)
+                .then((response) => {
+                    if (response.success) {
                         this.state.currentUser = user;
                         this.checkWorkspaceStatus();
                     } else {
@@ -110,7 +115,7 @@ const App = {
 
     // Check workspace status
     checkWorkspaceStatus: function() {
-        const workspace = Workspace.getCurrent();
+        const workspace = Workspace.getCurrentWorkspace();
         
         if (workspace) {
             this.state.currentWorkspace = workspace;
@@ -384,7 +389,7 @@ const App = {
 
     // Logout user
     logout: function() {
-        Auth.logout();
+        Auth.handleLogout();
     }
 };
 

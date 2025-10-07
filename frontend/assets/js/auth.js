@@ -9,7 +9,7 @@ window.Auth = {
      */
     init: function() {
         this.bindEvents();
-        this.checkAuthStatus();
+        // Note: checkAuthStatus is handled by the main App module
     },
     
     /**
