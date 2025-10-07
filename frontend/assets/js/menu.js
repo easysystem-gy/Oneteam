@@ -109,6 +109,10 @@ window.Menu = {
         const rootItems = this.menuItems.filter(item => item.level === 0);
         const childItems = this.menuItems.filter(item => item.level > 0);
         
+        Utils.log('Rendering menu - Root items:', rootItems.length);
+        Utils.log('Root items:', rootItems.map(item => ({ id: item.id, title: item.title, level: item.level })));
+        Utils.log('Child items:', childItems.map(item => ({ id: item.id, title: item.title, parent_id: item.parent_id, level: item.level })));
+        
         rootItems.forEach((item) => {
             const $menuItem = this.createMenuItem(item);
             $menuContainer.append($menuItem);
@@ -135,10 +139,13 @@ window.Menu = {
         const hasChildren = this.menuItems.some(child => child.parent_id === item.id);
         const isClickable = item.module_name || item.url;
         
+        Utils.log('Creating menu item:', item.title, 'hasChildren:', hasChildren, 'isClickable:', isClickable);
+        
         let $menuItem;
         
         if (hasChildren) {
             // Parent item with submenu
+            Utils.log('Creating parent menu item with children:', item.title, 'ID:', item.id);
             $menuItem = $(`
                 <li class="nav-item">
                     <a class="nav-link collapsed" href="#submenu-${item.id}" data-bs-toggle="collapse" 
@@ -150,6 +157,11 @@ window.Menu = {
                     </a>
                 </li>
             `);
+            
+            // Debug: Check if the attribute was added correctly
+            const $link = $menuItem.find('a');
+            Utils.log('Created menu item HTML:', $menuItem[0].outerHTML);
+            Utils.log('data-bs-toggle attribute:', $link.attr('data-bs-toggle'));
         } else if (isClickable) {
             // Clickable menu item
             const target = item.target || '_self';
