@@ -85,6 +85,45 @@ window.Menu = {
             e.preventDefault();
             this.toggleSidebarCollapse();
         });
+        
+        // User dropdown toggle - custom implementation for reliability
+        $(document).on('click', '[data-bs-toggle="dropdown"]', (e) => {
+            e.preventDefault();
+            const $trigger = $(e.currentTarget);
+            const $dropdown = $trigger.next('.dropdown-menu');
+            
+            Utils.log('Dropdown toggle clicked:', $trigger.attr('id'));
+            
+            if ($dropdown.length === 0) {
+                Utils.log('Dropdown menu not found');
+                return;
+            }
+            
+            // Close other dropdowns first
+            $('.dropdown-menu.show').not($dropdown).removeClass('show');
+            
+            // Toggle current dropdown
+            const isCurrentlyOpen = $dropdown.hasClass('show');
+            Utils.log('Dropdown currently open:', isCurrentlyOpen);
+            
+            if (isCurrentlyOpen) {
+                $dropdown.removeClass('show');
+                $trigger.attr('aria-expanded', 'false');
+                Utils.log('Dropdown closed');
+            } else {
+                $dropdown.addClass('show');
+                $trigger.attr('aria-expanded', 'true');
+                Utils.log('Dropdown opened');
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        $(document).on('click', (e) => {
+            if (!$(e.target).closest('.dropdown').length) {
+                $('.dropdown-menu.show').removeClass('show');
+                $('[data-bs-toggle="dropdown"]').attr('aria-expanded', 'false');
+            }
+        });
     },
     
     /**
