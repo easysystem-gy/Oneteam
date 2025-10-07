@@ -173,6 +173,21 @@ body {
     transform: rotate(90deg);
 }
 
+/* Submenu Collapse Animation */
+.collapse {
+    display: none;
+}
+
+.collapse.show {
+    display: block;
+}
+
+.collapsing {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.35s ease;
+}
+
 /* Main Content */
 .main-content {
     background-color: #f8f9fa;

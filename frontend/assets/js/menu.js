@@ -36,20 +36,42 @@ window.Menu = {
             this.navigateToModule(moduleId, menuId);
         });
         
-        // Submenu toggle
-        $(document).on('click', '.nav-link[data-bs-toggle="collapse"]', (e) => {
+        // Submenu toggle - use custom implementation instead of Bootstrap data attributes
+        $(document).on('click', '.submenu-trigger', (e) => {
+            e.preventDefault();
             const $link = $(e.currentTarget);
             const $icon = $link.find('.submenu-toggle');
+            const targetSelector = $link.attr('data-submenu-target');
+            const $submenu = $(targetSelector);
             
-            Utils.log('Submenu toggle clicked:', $link.attr('href'));
+            Utils.log('Submenu toggle clicked:', targetSelector);
             
-            // Don't prevent default - let Bootstrap handle the collapse
-            // Toggle icon rotation after Bootstrap processes the event
-            setTimeout(() => {
-                const isExpanded = $link.attr('aria-expanded') === 'true';
-                Utils.log('Submenu expanded state:', isExpanded);
-                $icon.toggleClass('rotate-90', isExpanded);
-            }, 100); // Increased timeout to ensure Bootstrap has processed
+            if ($submenu.length === 0) {
+                Utils.log('Submenu target not found:', targetSelector);
+                return;
+            }
+            
+            // Toggle the submenu using Bootstrap Collapse API
+            const isCurrentlyExpanded = $link.attr('aria-expanded') === 'true';
+            const newExpandedState = !isCurrentlyExpanded;
+            
+            Utils.log('Current expanded state:', isCurrentlyExpanded, '-> New state:', newExpandedState);
+            
+            // Update aria-expanded attribute
+            $link.attr('aria-expanded', newExpandedState);
+            
+            // Toggle submenu visibility with Bootstrap collapse
+            if (newExpandedState) {
+                // Expand submenu
+                $submenu.addClass('show');
+                $icon.addClass('rotate-90');
+                Utils.log('Submenu expanded');
+            } else {
+                // Collapse submenu
+                $submenu.removeClass('show');
+                $icon.removeClass('rotate-90');
+                Utils.log('Submenu collapsed');
+            }
         });
         
         // Menu toggle button (mobile)
@@ -128,8 +150,7 @@ window.Menu = {
         // Initialize tooltips for collapsed sidebar
         this.initializeTooltips();
         
-        // Initialize Bootstrap collapse components
-        this.initializeCollapseComponents();
+        // Note: Using custom submenu toggle implementation instead of Bootstrap collapse
     },
     
     /**
@@ -144,11 +165,12 @@ window.Menu = {
         let $menuItem;
         
         if (hasChildren) {
-            // Parent item with submenu
+            // Parent item with submenu - use custom data attribute instead of Bootstrap's data-bs-toggle
             Utils.log('Creating parent menu item with children:', item.title, 'ID:', item.id);
             $menuItem = $(`
                 <li class="nav-item">
-                    <a class="nav-link collapsed" href="#submenu-${item.id}" data-bs-toggle="collapse" 
+                    <a class="nav-link collapsed submenu-trigger" href="#" 
+                       data-submenu-target="#submenu-${item.id}"
                        aria-expanded="false" aria-controls="submenu-${item.id}" 
                        title="${item.title}">
                         <i class="${item.icon}"></i>
@@ -158,10 +180,10 @@ window.Menu = {
                 </li>
             `);
             
-            // Debug: Check if the attribute was added correctly
+            // Debug: Check if the custom attribute was added correctly
             const $link = $menuItem.find('a');
             Utils.log('Created menu item HTML:', $menuItem[0].outerHTML);
-            Utils.log('data-bs-toggle attribute:', $link.attr('data-bs-toggle'));
+            Utils.log('data-submenu-target attribute:', $link.attr('data-submenu-target'));
         } else if (isClickable) {
             // Clickable menu item
             const target = item.target || '_self';
@@ -531,31 +553,7 @@ window.Menu = {
         }
     },
     
-    /**
-     * Initialize Bootstrap collapse components
-     */
-    initializeCollapseComponents: function() {
-        Utils.log('Initializing Bootstrap collapse components');
-        
-        // Find all collapse triggers and ensure they're properly initialized
-        $('[data-bs-toggle="collapse"]').each(function() {
-            const $trigger = $(this);
-            const targetId = $trigger.attr('href') || $trigger.attr('data-bs-target');
-            const $target = $(targetId);
-            
-            if ($target.length > 0) {
-                Utils.log('Found collapse trigger:', targetId);
-                
-                // Ensure Bootstrap collapse is initialized
-                if (!$target.data('bs.collapse')) {
-                    Utils.log('Initializing collapse for:', targetId);
-                    new bootstrap.Collapse($target[0], {
-                        toggle: false
-                    });
-                }
-            }
-        });
-    },
+
     
     /**
      * Initialize module-specific components
