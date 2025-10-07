@@ -1,5 +1,6 @@
--- PostgreSQL Migration: Create menu system tables
+-- PostgreSQL Migration: Create menu system tables (Fixed Version)
 -- This migration creates the menu system tables with PostgreSQL-specific features
+-- Fixed version to resolve datatype mismatch issues
 
 -- Create menu_items table with hierarchical structure support
 CREATE TABLE menu_items (
@@ -193,74 +194,46 @@ SELECT
     CURRENT_TIMESTAMP
 FROM menu_items;
 
--- Create a recursive CTE view for hierarchical menu structure
+-- Create a simpler hierarchical view without complex recursive CTEs
 CREATE VIEW menu_hierarchy AS
-WITH RECURSIVE menu_tree AS (
-    -- Base case: root menu items
-    SELECT 
-        id,
-        uuid,
-        workspace_id,
-        parent_id,
-        title,
-        icon,
-        url,
-        module_name,
-        target,
-        sort_order,
-        is_active,
-        is_visible,
-        permissions,
-        metadata,
-        created_at,
-        updated_at,
-        0 as level,
-        ARRAY[sort_order] as path,
-        title as full_path
-    FROM menu_items 
-    WHERE parent_id IS NULL
-    
-    UNION ALL
-    
-    -- Recursive case: child menu items
-    SELECT 
-        mi.id,
-        mi.uuid,
-        mi.workspace_id,
-        mi.parent_id,
-        mi.title,
-        mi.icon,
-        mi.url,
-        mi.module_name,
-        mi.target,
-        mi.sort_order,
-        mi.is_active,
-        mi.is_visible,
-        mi.permissions,
-        mi.metadata,
-        mi.created_at,
-        mi.updated_at,
-        mt.level + 1,
-        mt.path || mi.sort_order,
-        mt.full_path || ' > ' || mi.title
-    FROM menu_items mi
-    JOIN menu_tree mt ON mi.parent_id = mt.id
-)
-SELECT * FROM menu_tree;
+SELECT 
+    mi.id,
+    mi.uuid,
+    mi.workspace_id,
+    mi.parent_id,
+    mi.title,
+    mi.icon,
+    mi.url,
+    mi.module_name,
+    mi.target,
+    mi.sort_order,
+    mi.is_active,
+    mi.is_visible,
+    mi.permissions,
+    mi.metadata,
+    mi.created_at,
+    mi.updated_at,
+    CASE WHEN mi.parent_id IS NULL THEN 0 ELSE 1 END as level,
+    CASE WHEN mi.parent_id IS NULL THEN mi.title 
+         ELSE COALESCE(p.title, '') || ' > ' || mi.title 
+    END as full_path,
+    EXISTS(SELECT 1 FROM menu_items child WHERE child.parent_id = mi.id) as has_children
+FROM menu_items mi
+LEFT JOIN menu_items p ON mi.parent_id = p.id;
 
 COMMENT ON VIEW menu_hierarchy IS 'Hierarchical view of menu items with level and path information';
 
--- Create function to get menu items for a user in a workspace
+-- Create function to get menu items for a user in a workspace (simplified version)
 CREATE OR REPLACE FUNCTION get_user_menu(p_user_id INTEGER, p_workspace_id INTEGER)
 RETURNS TABLE (
     id INTEGER,
     uuid UUID,
     parent_id INTEGER,
-    title VARCHAR(255),
-    icon VARCHAR(100),
+    title TEXT,
+    icon TEXT,
     url TEXT,
-    module_name VARCHAR(100),
-    target VARCHAR(20),
+    module_name TEXT,
+    target TEXT,
     sort_order INTEGER,
     level INTEGER,
     has_children BOOLEAN,
@@ -274,51 +247,34 @@ BEGIN
         SELECT uw.role
         FROM user_workspaces uw
         WHERE uw.user_id = p_user_id AND uw.workspace_id = p_workspace_id
-    ),
-    menu_with_permissions AS (
-        SELECT 
-            mh.id,
-            mh.uuid,
-            mh.parent_id,
-            mh.title,
-            mh.icon,
-            mh.url,
-            mh.module_name,
-            mh.target,
-            mh.sort_order,
-            mh.level,
-            EXISTS(SELECT 1 FROM menu_items child WHERE child.parent_id = mh.id) as has_children,
-            COALESCE(mup.can_view, mp.can_view, false) as can_view,
-            COALESCE(mup.can_edit, mp.can_edit, false) as can_edit,
-            COALESCE(mup.can_delete, mp.can_delete, false) as can_delete
-        FROM menu_hierarchy mh
-        LEFT JOIN menu_permissions mp ON mh.id = mp.menu_item_id 
-            AND mp.role = (SELECT role FROM user_role)
-        LEFT JOIN menu_user_permissions mup ON mh.id = mup.menu_item_id 
-            AND mup.user_id = p_user_id 
-            AND mup.workspace_id = p_workspace_id
-        WHERE mh.workspace_id = p_workspace_id
-          AND mh.is_active = true
-          AND mh.is_visible = true
+        LIMIT 1
     )
     SELECT 
-        mwp.id,
-        mwp.uuid,
-        mwp.parent_id,
-        mwp.title,
-        mwp.icon,
-        mwp.url,
-        mwp.module_name,
-        mwp.target,
-        mwp.sort_order,
-        mwp.level,
-        mwp.has_children,
-        mwp.can_view,
-        mwp.can_edit,
-        mwp.can_delete
-    FROM menu_with_permissions mwp
-    WHERE mwp.can_view = true
-    ORDER BY mwp.level, mwp.sort_order;
+        mh.id,
+        mh.uuid,
+        mh.parent_id,
+        mh.title::TEXT,
+        mh.icon::TEXT,
+        mh.url,
+        mh.module_name::TEXT,
+        mh.target::TEXT,
+        mh.sort_order,
+        mh.level,
+        mh.has_children,
+        COALESCE(mup.can_view, mp.can_view, false) as can_view,
+        COALESCE(mup.can_edit, mp.can_edit, false) as can_edit,
+        COALESCE(mup.can_delete, mp.can_delete, false) as can_delete
+    FROM menu_hierarchy mh
+    LEFT JOIN menu_permissions mp ON mh.id = mp.menu_item_id 
+        AND mp.role = (SELECT role FROM user_role)
+    LEFT JOIN menu_user_permissions mup ON mh.id = mup.menu_item_id 
+        AND mup.user_id = p_user_id 
+        AND mup.workspace_id = p_workspace_id
+    WHERE mh.workspace_id = p_workspace_id
+      AND mh.is_active = true
+      AND mh.is_visible = true
+      AND COALESCE(mup.can_view, mp.can_view, false) = true
+    ORDER BY mh.level, mh.sort_order;
 END;
 $$ LANGUAGE plpgsql;
 
