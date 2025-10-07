@@ -1,0 +1,736 @@
+openapi: 3.0.3
+info:
+  title: Oneteam API
+  description: |
+    Oneteam is a modern one-page web application with a RESTful API for workspace management, 
+    user authentication, and configurable menu systems.
+    
+    ## Authentication
+    This API uses JWT (JSON Web Tokens) for authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+    
+    ## Rate Limiting
+    API requests are limited to 100 requests per minute per IP address.
+    
+  version: 1.0.0
+  contact:
+    name: EasySystem
+    email: info@easysystem.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: /api/v1
+    description: Production server
+  - url: http://localhost/api/v1
+    description: Development server
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: admin
+                password:
+                  type: string
+                  example: admin123
+                remember:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Login successful
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+                      user:
+                        $ref: '#/components/schemas/User'
+                      expires_at:
+                        type: string
+                        format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Invalidate current JWT token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user profile
+      description: Retrieve the authenticated user's profile information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /workspaces:
+    get:
+      tags:
+        - Workspaces
+      summary: List user workspaces
+      description: Get all workspaces accessible to the authenticated user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: Workspaces retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Workspace'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Workspaces
+      summary: Create workspace
+      description: Create a new workspace
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: My Workspace
+                description:
+                  type: string
+                  example: A workspace for my team
+                color:
+                  type: string
+                  example: "#0d6efd"
+                icon:
+                  type: string
+                  example: "fas fa-briefcase"
+      responses:
+        '201':
+          description: Workspace created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Workspace created successfully
+                  data:
+                    $ref: '#/components/schemas/Workspace'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /workspaces/{id}:
+    get:
+      tags:
+        - Workspaces
+      summary: Get workspace
+      description: Retrieve a specific workspace by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workspace ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Workspace retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Workspace'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Workspaces
+      summary: Update workspace
+      description: Update an existing workspace
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workspace ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                color:
+                  type: string
+                icon:
+                  type: string
+      responses:
+        '200':
+          description: Workspace updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Workspace updated successfully
+                  data:
+                    $ref: '#/components/schemas/Workspace'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags:
+        - Workspaces
+      summary: Delete workspace
+      description: Delete a workspace
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workspace ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Workspace deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /workspaces/{id}/select:
+    post:
+      tags:
+        - Workspaces
+      summary: Select workspace
+      description: Set the active workspace for the current session
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workspace ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Workspace selected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Workspace selected successfully
+                  data:
+                    $ref: '#/components/schemas/Workspace'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /menu:
+    get:
+      tags:
+        - Menu
+      summary: Get menu items
+      description: Retrieve menu items for the current workspace
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspace_id
+          in: query
+          description: Workspace ID (optional, uses current workspace if not provided)
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Menu items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MenuItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List users
+      description: Get all users (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 25
+        - name: search
+          in: query
+          description: Search term
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /content/{module}:
+    get:
+      tags:
+        - Content
+      summary: Load module content
+      description: Load HTML content for a specific module
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: module
+          in: path
+          required: true
+          description: Module name
+          schema:
+            type: string
+            example: dashboard
+      responses:
+        '200':
+          description: Content loaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      html:
+                        type: string
+                        example: "<div>Module content here</div>"
+                      scripts:
+                        type: array
+                        items:
+                          type: string
+                      styles:
+                        type: array
+                        items:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: string
+          example: "user-uuid-123456"
+        username:
+          type: string
+          example: "admin"
+        email:
+          type: string
+          example: "admin@oneteam.local"
+        first_name:
+          type: string
+          example: "System"
+        last_name:
+          type: string
+          example: "Administrator"
+        is_active:
+          type: boolean
+          example: true
+        is_admin:
+          type: boolean
+          example: true
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: string
+          example: "workspace-uuid-123456"
+        name:
+          type: string
+          example: "Default Workspace"
+        description:
+          type: string
+          example: "Default workspace for all users"
+        color:
+          type: string
+          example: "#0d6efd"
+        icon:
+          type: string
+          example: "fas fa-home"
+        is_active:
+          type: boolean
+          example: true
+        settings:
+          type: object
+          nullable: true
+        created_by:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        user_role:
+          type: string
+          example: "admin"
+          description: "Current user's role in this workspace"
+
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        uuid:
+          type: string
+          example: "menu-uuid-123456"
+        workspace_id:
+          type: integer
+          example: 1
+        parent_id:
+          type: integer
+          nullable: true
+          example: null
+        title:
+          type: string
+          example: "Dashboard"
+        icon:
+          type: string
+          example: "fas fa-tachometer-alt"
+        url:
+          type: string
+          nullable: true
+        module_name:
+          type: string
+          example: "dashboard"
+        target:
+          type: string
+          example: "_self"
+        sort_order:
+          type: integer
+          example: 1
+        is_active:
+          type: boolean
+          example: true
+        is_visible:
+          type: boolean
+          example: true
+        permissions:
+          type: array
+          items:
+            type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
+
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 25
+        total:
+          type: integer
+          example: 100
+        total_pages:
+          type: integer
+          example: 4
+        has_next:
+          type: boolean
+          example: true
+        has_prev:
+          type: boolean
+          example: false
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "An error occurred"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Authentication required"
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Insufficient permissions"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Resource not found"
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Workspaces
+    description: Workspace management operations
+  - name: Menu
+    description: Menu system operations
+  - name: Users
+    description: User management operations
+  - name: Content
+    description: Dynamic content loading
