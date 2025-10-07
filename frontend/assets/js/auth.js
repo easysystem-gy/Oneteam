@@ -172,8 +172,9 @@ window.Auth = {
     clearAuthData: function() {
         Utils.removeToken();
         Utils.removeCurrentUser();
-        Utils.storage.remove(Config.storage.workspace);
-        Utils.storage.remove(Config.storage.preferences);
+        Utils.storage.remove(Config.auth.workspaceKey);
+        // Note: preferences key not defined in config, using direct string
+        Utils.storage.remove('oneteam_preferences');
     },
     
     /**

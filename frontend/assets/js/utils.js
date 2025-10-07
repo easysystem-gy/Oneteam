@@ -77,41 +77,41 @@ window.Utils = {
      * Token management
      */
     getToken: function() {
-        return this.storage.get(Config.storage.token);
+        return this.storage.get(Config.auth.tokenKey);
     },
     
     setToken: function(token) {
-        return this.storage.set(Config.storage.token, token);
+        return this.storage.set(Config.auth.tokenKey, token);
     },
     
     removeToken: function() {
-        return this.storage.remove(Config.storage.token);
+        return this.storage.remove(Config.auth.tokenKey);
     },
     
     /**
      * User management
      */
     getCurrentUser: function() {
-        return this.storage.get(Config.storage.user);
+        return this.storage.get(Config.auth.userKey);
     },
     
     setCurrentUser: function(user) {
-        return this.storage.set(Config.storage.user, user);
+        return this.storage.set(Config.auth.userKey, user);
     },
     
     removeCurrentUser: function() {
-        return this.storage.remove(Config.storage.user);
+        return this.storage.remove(Config.auth.userKey);
     },
     
     /**
      * Workspace management
      */
     getCurrentWorkspace: function() {
-        return this.storage.get(Config.storage.workspace);
+        return this.storage.get(Config.auth.workspaceKey);
     },
     
     setCurrentWorkspace: function(workspace) {
-        return this.storage.set(Config.storage.workspace, workspace);
+        return this.storage.set(Config.auth.workspaceKey, workspace);
     },
     
     /**
