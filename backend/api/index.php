@@ -31,6 +31,12 @@ $segments = explode('/', $path);
 $endpoint = $segments[0] ?? '';
 $action = $segments[1] ?? '';
 
+// Debug logging (remove in production)
+error_log("API Debug - Request URI: " . $requestUri);
+error_log("API Debug - Parsed path: " . $path);
+error_log("API Debug - Endpoint: " . $endpoint);
+error_log("API Debug - Action: " . $action);
+
 // Get request method and data
 $method = $_SERVER['REQUEST_METHOD'];
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -68,9 +74,24 @@ switch ($endpoint) {
         handleUsers($action, $method, $input);
         break;
         
+    case 'docs':
+        // Serve Swagger UI HTML as fallback if .htaccess doesn't work
+        header('Content-Type: text/html; charset=utf-8');
+        if (file_exists(__DIR__ . '/docs.html')) {
+            readfile(__DIR__ . '/docs.html');
+        } else {
+            echo '<h1>Swagger Documentation</h1><p>docs.html file not found</p>';
+        }
+        exit();
+        break;
+        
     case 'openapi.json':
         header('Content-Type: application/json');
-        include 'openapi.php';
+        if (file_exists(__DIR__ . '/openapi.json')) {
+            readfile(__DIR__ . '/openapi.json');
+        } else {
+            include 'openapi.php';
+        }
         exit();
         break;
         
