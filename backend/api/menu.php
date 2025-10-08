@@ -59,7 +59,7 @@ try {
  * Handle GET requests - Retrieve menu items
  */
 function handleGet($conn, $params) {
-    $workspaceId = $_SESSION['current_workspace_id'] ?? null;
+    $workspaceId = getCurrentWorkspaceId();
     
     if (!$workspaceId) {
         http_response_code(400);
@@ -96,11 +96,16 @@ function handleGet($conn, $params) {
         $stmt->execute([$workspaceId]);
         $menuItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // Add level information to menu items
+        $menuItemsWithLevels = addLevelsToMenuItems($menuItems);
+        
         // Build hierarchical structure
-        $hierarchicalMenu = buildMenuHierarchy($menuItems);
+        $hierarchicalMenu = buildMenuHierarchy($menuItemsWithLevels);
         
         echo json_encode([
-            'menu_items' => $menuItems,
+            'success' => true,
+            'data' => $menuItemsWithLevels,
+            'menu_items' => $menuItemsWithLevels,
             'hierarchical' => $hierarchicalMenu
         ]);
     }
@@ -110,7 +115,7 @@ function handleGet($conn, $params) {
  * Handle POST requests - Create new menu item
  */
 function handlePost($conn, $input) {
-    $workspaceId = $_SESSION['current_workspace_id'] ?? null;
+    $workspaceId = getCurrentWorkspaceId();
     
     if (!$workspaceId) {
         http_response_code(400);
@@ -180,7 +185,7 @@ function handlePost($conn, $input) {
  * Handle PUT requests - Update menu item
  */
 function handlePut($conn, $input) {
-    $workspaceId = $_SESSION['current_workspace_id'] ?? null;
+    $workspaceId = getCurrentWorkspaceId();
     
     if (!$workspaceId || empty($input['id'])) {
         http_response_code(400);
@@ -243,7 +248,7 @@ function handlePut($conn, $input) {
  * Handle DELETE requests - Delete menu item
  */
 function handleDelete($conn, $params) {
-    $workspaceId = $_SESSION['current_workspace_id'] ?? null;
+    $workspaceId = getCurrentWorkspaceId();
     
     if (!$workspaceId || empty($params['id'])) {
         http_response_code(400);
@@ -279,6 +284,59 @@ function handleDelete($conn, $params) {
         http_response_code(500);
         echo json_encode(['error' => 'Failed to delete menu item']);
     }
+}
+
+/**
+ * Add level information to menu items
+ */
+function addLevelsToMenuItems($menuItems) {
+    $itemsWithLevels = [];
+    $itemsById = [];
+    
+    // Create lookup array
+    foreach ($menuItems as $item) {
+        $itemsById[$item['id']] = $item;
+    }
+    
+    // Calculate levels
+    foreach ($menuItems as $item) {
+        $level = calculateItemLevel($item, $itemsById);
+        $item['level'] = $level;
+        $item['has_children'] = hasChildren($item['id'], $menuItems);
+        $item['can_view'] = true; // Default permissions
+        $item['can_edit'] = true;
+        $item['can_delete'] = true;
+        $itemsWithLevels[] = $item;
+    }
+    
+    return $itemsWithLevels;
+}
+
+/**
+ * Calculate the level of a menu item
+ */
+function calculateItemLevel($item, $itemsById, $level = 0) {
+    if ($item['parent_id'] === null) {
+        return 0;
+    }
+    
+    if (isset($itemsById[$item['parent_id']])) {
+        return calculateItemLevel($itemsById[$item['parent_id']], $itemsById, $level + 1);
+    }
+    
+    return $level;
+}
+
+/**
+ * Check if item has children
+ */
+function hasChildren($itemId, $menuItems) {
+    foreach ($menuItems as $item) {
+        if ($item['parent_id'] == $itemId) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**

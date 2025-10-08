@@ -242,70 +242,9 @@ function handleWorkspaces($action, $method, $input) {
  * Handle menu endpoints
  */
 function handleMenu($action, $method, $input) {
-    // Demo menu data
-    $menu = [
-        [
-            'id' => 1,
-            'uuid' => 'menu-uuid-1',
-            'parent_id' => null,
-            'title' => 'Dashboard',
-            'icon' => 'fas fa-tachometer-alt',
-            'module_name' => 'dashboard',
-            'sort_order' => 1,
-            'level' => 0,
-            'has_children' => false,
-            'can_view' => true,
-            'can_edit' => true,
-            'can_delete' => false
-        ],
-        [
-            'id' => 2,
-            'uuid' => 'menu-uuid-2',
-            'parent_id' => null,
-            'title' => 'User Management',
-            'icon' => 'fas fa-users',
-            'module_name' => null,
-            'sort_order' => 2,
-            'level' => 0,
-            'has_children' => true,
-            'can_view' => true,
-            'can_edit' => true,
-            'can_delete' => false
-        ],
-        [
-            'id' => 6,
-            'uuid' => 'menu-uuid-6',
-            'parent_id' => 2,
-            'title' => 'Users List',
-            'icon' => 'fas fa-list',
-            'module_name' => 'users/list',
-            'sort_order' => 1,
-            'level' => 1,
-            'has_children' => false,
-            'can_view' => true,
-            'can_edit' => false,
-            'can_delete' => false
-        ],
-        [
-            'id' => 5,
-            'uuid' => 'menu-uuid-5',
-            'parent_id' => null,
-            'title' => 'Reports',
-            'icon' => 'fas fa-chart-bar',
-            'module_name' => 'reports',
-            'sort_order' => 5,
-            'level' => 0,
-            'has_children' => false,
-            'can_view' => true,
-            'can_edit' => false,
-            'can_delete' => false
-        ]
-    ];
-    
-    jsonResponse([
-        'success' => true,
-        'data' => $menu
-    ]);
+    // Include the actual menu API handler
+    include_once __DIR__ . '/menu.php';
+    // The menu.php file will handle the response and exit
 }
 
 /**
