@@ -91,7 +91,8 @@ try {
         'menu_api' => file_exists('../api/menu.php'),
         'menu_management_js' => file_exists('../assets/js/menu-management.js'),
         'menu_management_html' => file_exists('../modules/menu-management.html'),
-        'migration_file' => file_exists('../../database/migrations/005_add_menu_management.sql')
+        'migration_file_sqlite' => file_exists('../../database/migrations/005_add_menu_management.sql'),
+        'migration_file_postgresql' => file_exists('../../database/migrations/postgresql/005_add_menu_management.sql')
     ];
     
     // Check permissions table

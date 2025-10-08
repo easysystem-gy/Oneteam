@@ -17,8 +17,11 @@ try {
     $conn = $db->getConnection();
     $result['database_connection'] = 'OK';
     
-    // Read the migration file
-    $migrationFile = '../../database/migrations/005_add_menu_management.sql';
+    // Read the migration file (try PostgreSQL version first, then fallback to SQLite)
+    $migrationFile = '../../database/migrations/postgresql/005_add_menu_management.sql';
+    if (!file_exists($migrationFile)) {
+        $migrationFile = '../../database/migrations/005_add_menu_management.sql';
+    }
     
     if (!file_exists($migrationFile)) {
         throw new Exception("Migration file not found: $migrationFile");
