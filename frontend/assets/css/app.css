@@ -346,6 +346,55 @@ body {
     font-size: 1.5rem;
 }
 
+/* Workspace Dropdown */
+.workspace-dropdown-trigger {
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+.workspace-dropdown-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white !important;
+}
+
+.workspace-dropdown-menu {
+    min-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+}
+
+.workspace-dropdown-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.workspace-dropdown-item:hover {
+    background-color: var(--light-color);
+    transform: translateX(5px);
+}
+
+.workspace-dropdown-item .workspace-name {
+    font-weight: 500;
+    display: block;
+}
+
+.workspace-dropdown-item small {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.workspace-dropdown-item .badge {
+    font-size: 0.65rem;
+    position: absolute;
+    right: 1rem;
+    top: 0.75rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {

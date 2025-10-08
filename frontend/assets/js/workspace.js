@@ -26,10 +26,25 @@ window.Workspace = {
      * Bind workspace-related events
      */
     bindEvents: function() {
-        // Workspace selector change
-        $(document).on('change', '#workspace-selector', (e) => {
-            const workspaceId = parseInt($(e.target).val());
+        // Workspace dropdown toggle
+        $(document).on('click', '.workspace-dropdown-trigger', (e) => {
+            e.preventDefault();
+            const $dropdown = $('.workspace-dropdown-menu');
+            $dropdown.toggleClass('show');
+        });
+        
+        // Workspace selection from dropdown
+        $(document).on('click', '.workspace-dropdown-item', (e) => {
+            e.preventDefault();
+            const workspaceId = parseInt($(e.target).data('workspace-id'));
             this.switchWorkspace(workspaceId);
+        });
+        
+        // Close dropdown when clicking outside
+        $(document).on('click', (e) => {
+            if (!$(e.target).closest('.workspace-dropdown-trigger, .workspace-dropdown-menu').length) {
+                $('.workspace-dropdown-menu').removeClass('show');
+            }
         });
         
         // Workspace settings button
@@ -42,11 +57,6 @@ window.Workspace = {
         $(document).on('click', '#create-workspace-btn', (e) => {
             e.preventDefault();
             this.showCreateWorkspaceModal();
-        });
-        
-        // Workspace color picker
-        $(document).on('change', '#workspace-color', (e) => {
-            this.updateWorkspaceColor($(e.target).val());
         });
     },
     
@@ -63,8 +73,7 @@ window.Workspace = {
         .then((response) => {
             if (response.success) {
                 this.workspaces = response.data;
-                this.updateWorkspaceSelector();
-                this.renderWorkspaceList();
+                this.updateNavbarWorkspaceDropdown();
                 this.setCurrentWorkspace();
                 Utils.log('Workspaces loaded:', this.workspaces);
             } else {
@@ -79,27 +88,34 @@ window.Workspace = {
     },
     
     /**
-     * Update workspace selector dropdown
+     * Update navbar workspace dropdown
      */
-    updateWorkspaceSelector: function() {
-        const $selector = $('#workspace-selector');
-        if ($selector.length === 0) return;
+    updateNavbarWorkspaceDropdown: function() {
+        const $dropdown = $('#workspace-dropdown-menu');
+        if ($dropdown.length === 0) return;
         
-        $selector.empty();
+        // Clear existing items (keep header)
+        $dropdown.find('.workspace-dropdown-item, .dropdown-divider').remove();
         
-        this.workspaces.forEach((workspace) => {
-            const option = $('<option></option>')
-                .attr('value', workspace.id)
-                .text(workspace.name)
-                .data('workspace', workspace);
+        // Add workspace items
+        this.workspaces.forEach((workspace, index) => {
+            if (index > 0) {
+                $dropdown.append('<li><hr class="dropdown-divider"></li>');
+            }
             
-            $selector.append(option);
+            const $item = $(`
+                <li>
+                    <a class="dropdown-item workspace-dropdown-item" href="#" data-workspace-id="${workspace.id}">
+                        <i class="${workspace.icon} me-2" style="color: ${workspace.color}"></i>
+                        <span class="workspace-name">${workspace.name}</span>
+                        <small class="text-muted d-block">${workspace.description}</small>
+                        <span class="badge bg-secondary ms-auto">${workspace.user_role}</span>
+                    </a>
+                </li>
+            `);
+            
+            $dropdown.append($item);
         });
-        
-        // Select current workspace
-        if (this.currentWorkspace) {
-            $selector.val(this.currentWorkspace.id);
-        }
     },
     
     /**
@@ -185,6 +201,17 @@ window.Workspace = {
     },
     
     /**
+     * Auto-select default workspace
+     */
+    autoSelectDefaultWorkspace: function() {
+        if (this.workspaces.length === 0) return;
+        
+        // Find default workspace or use first one
+        const defaultWorkspace = this.workspaces.find(w => w.is_default) || this.workspaces[0];
+        this.setCurrentWorkspace(defaultWorkspace.id);
+    },
+    
+    /**
      * Set current workspace
      */
     setCurrentWorkspace: function(workspaceId = null) {
@@ -235,6 +262,9 @@ window.Workspace = {
         setTimeout(() => {
             this.setCurrentWorkspace(workspaceId);
             
+            // Close dropdown
+            $('.workspace-dropdown-menu').removeClass('show');
+            
             // Reload menu for new workspace
             if (window.Menu) {
                 Menu.loadMenu();
@@ -256,21 +286,18 @@ window.Workspace = {
         
         const workspace = this.currentWorkspace;
         
-        // Update workspace name in header
+        // Update workspace name in navbar
         $('#current-workspace-name').text(workspace.name);
+        
+        // Update workspace icon in navbar
+        if (workspace.icon) {
+            $('#current-workspace-icon').removeClass().addClass(workspace.icon);
+        }
         
         // Update workspace color/theme
         if (workspace.color) {
             this.applyWorkspaceTheme(workspace.color);
         }
-        
-        // Update workspace icon
-        if (workspace.icon) {
-            $('#workspace-icon').removeClass().addClass(workspace.icon);
-        }
-        
-        // Update workspace selector
-        $('#workspace-selector').val(workspace.id);
         
         // Update page title
         document.title = `${workspace.name} - Oneteam`;

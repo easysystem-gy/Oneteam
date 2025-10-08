@@ -125,13 +125,19 @@ const App = {
 
     // Check workspace status
     checkWorkspaceStatus: function() {
-        const workspace = Workspace.getCurrentWorkspace();
+        // Always show main app and load workspaces in navbar
+        this.showMainApp();
         
-        if (workspace) {
-            this.state.currentWorkspace = workspace;
-            this.showMainApp();
+        // Load workspaces for the navbar dropdown
+        Workspace.loadWorkspaces();
+        
+        // Set default workspace if none is selected
+        const workspace = Workspace.getCurrentWorkspace();
+        if (!workspace) {
+            // Auto-select the first available workspace or default workspace
+            Workspace.autoSelectDefaultWorkspace();
         } else {
-            this.showWorkspaceSelection();
+            this.state.currentWorkspace = workspace;
         }
     },
 
@@ -156,22 +162,12 @@ const App = {
         }, 100);
     },
 
-    // Show workspace selection screen
-    showWorkspaceSelection: function() {
-        $('#loading-screen').addClass('d-none');
-        $('#login-screen').addClass('d-none');
-        $('#workspace-screen').removeClass('d-none').addClass('fade-in');
-        $('#main-app').addClass('d-none');
-        
-        // Load workspaces
-        Workspace.loadWorkspaces();
-    },
+
 
     // Show main application
     showMainApp: function() {
         $('#loading-screen').addClass('d-none');
         $('#login-screen').addClass('d-none');
-        $('#workspace-screen').addClass('d-none');
         $('#main-app').removeClass('d-none').addClass('fade-in');
         
         // Initialize main app components
