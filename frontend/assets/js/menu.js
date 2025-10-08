@@ -363,6 +363,9 @@ window.Menu = {
     navigateToModule: function(moduleId, menuId) {
         if (!moduleId) return;
         
+        console.log('=== NAVIGATION DEBUG ===');
+        console.log('Module ID:', moduleId);
+        console.log('Menu ID:', menuId);
         Utils.log('Navigating to module:', moduleId);
         
         // Update active menu item
@@ -419,6 +422,10 @@ window.Menu = {
         
         // Generate content based on module
         let content = '';
+        
+        console.log('=== MODULE LOADING DEBUG ===');
+        console.log('Loading module:', moduleId);
+        console.log('Available cases: dashboard, users/list, users/create, workspaces/list, reports, profile, menu-management, workspace-settings, general-settings');
         
         switch (moduleId) {
             case 'dashboard':
