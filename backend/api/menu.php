@@ -6,6 +6,15 @@
 
 require_once '../config/database.php';
 require_once '../includes/auth.php';
+require_once '../core/Database/DatabaseFactory.php';
+require_once '../core/Database/DatabaseAdapterInterface.php';
+require_once '../core/Database/BaseAdapter.php';
+require_once '../core/Database/Adapters/PostgreSQLAdapter.php';
+require_once '../core/Database/Adapters/MariaDBAdapter.php';
+require_once '../core/Database/Adapters/SQLServerAdapter.php';
+require_once '../core/Database/Adapters/SQLiteAdapter.php';
+
+use Oneteam\Database\DatabaseFactory;
 
 // Enable CORS
 header('Access-Control-Allow-Origin: *');
@@ -30,8 +39,50 @@ $method = $_SERVER['REQUEST_METHOD'];
 $input = json_decode(file_get_contents('php://input'), true);
 
 try {
-    $db = new Database();
-    $conn = $db->getConnection();
+    // For testing purposes, create a simple SQLite connection
+    // TODO: Replace with proper database factory when database is configured
+    $dbPath = __DIR__ . '/../database/oneteam.db';
+    $dbDir = dirname($dbPath);
+    
+    // Create database directory if it doesn't exist
+    if (!is_dir($dbDir)) {
+        mkdir($dbDir, 0755, true);
+    }
+    
+    // Create SQLite connection
+    $conn = new PDO("sqlite:$dbPath");
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Create menu table if it doesn't exist
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS menu_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            uuid TEXT UNIQUE NOT NULL,
+            workspace_id INTEGER NOT NULL DEFAULT 1,
+            parent_id INTEGER NULL,
+            title TEXT NOT NULL,
+            icon TEXT DEFAULT 'fas fa-circle',
+            module_name TEXT,
+            sort_order INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (parent_id) REFERENCES menu_items(id) ON DELETE CASCADE
+        )
+    ");
+    
+    // Insert some sample data if table is empty
+    $count = $conn->query("SELECT COUNT(*) FROM menu_items")->fetchColumn();
+    if ($count == 0) {
+        $conn->exec("
+            INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order) VALUES
+            ('dashboard-uuid', 1, NULL, 'Dashboard', 'fas fa-tachometer-alt', 'dashboard', 1),
+            ('users-uuid', 1, NULL, 'User Management', 'fas fa-users', NULL, 2),
+            ('users-list-uuid', 1, 2, 'Users List', 'fas fa-list', 'users/list', 1),
+            ('reports-uuid', 1, NULL, 'Reports', 'fas fa-chart-bar', 'reports', 3),
+            ('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 4)
+        ");
+    }
     
     switch ($method) {
         case 'GET':
@@ -70,7 +121,7 @@ function handleGet($conn, $params) {
     if (isset($params['id'])) {
         // Get single menu item
         $stmt = $conn->prepare("
-            SELECT id, workspace_id, parent_id, title, icon, url, module_name, 
+            SELECT id, uuid, workspace_id, parent_id, title, icon, module_name, 
                    sort_order, is_active, created_at, updated_at
             FROM menu_items 
             WHERE id = ? AND workspace_id = ?
@@ -87,7 +138,7 @@ function handleGet($conn, $params) {
     } else {
         // Get all menu items for workspace
         $stmt = $conn->prepare("
-            SELECT id, workspace_id, parent_id, title, icon, url, module_name, 
+            SELECT id, uuid, workspace_id, parent_id, title, icon, module_name, 
                    sort_order, is_active, created_at, updated_at
             FROM menu_items 
             WHERE workspace_id = ? 
