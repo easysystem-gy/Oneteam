@@ -1,0 +1,352 @@
+<!-- User Profile Module -->
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>
+                        User Profile
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-id-card me-2"></i>
+                        Profile Information
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Avatar -->
+                    <div class="avatar-container mb-3">
+                        <img id="profile-avatar" src="/api/uploads/avatars/admin.jpg" 
+                             alt="Profile Avatar" class="avatar-img rounded-circle" 
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZTllY2VmIi8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iMzciIHI9IjE1IiBmaWxsPSIjNmM3NTdkIi8+CjxwYXRoIGQ9Ik0yMCA4MEM0MCA2MCA2MCA2MCA4MCA4MEgyMFoiIGZpbGw9IiM2Yzc1N2QiLz4KPC9zdmc+'">
+                        <div class="avatar-overlay">
+                            <button type="button" class="btn btn-sm btn-light" onclick="Profile.showAvatarUpload()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <h5 id="profile-name" class="mb-1">Loading...</h5>
+                    <p id="profile-email" class="text-muted mb-2">Loading...</p>
+                    <p id="profile-role" class="badge bg-primary mb-3">Loading...</p>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <small class="text-muted">Member Since</small>
+                            <div id="profile-member-since" class="fw-bold">Loading...</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Last Login</small>
+                            <div id="profile-last-login" class="fw-bold">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="col-lg-8 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Profile
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="profile-form">
+                        <div class="row">
+                            <!-- Personal Information -->
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" readonly>
+                                <small class="text-muted">Email cannot be changed here</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="bio" class="form-label">Bio</label>
+                                <textarea class="form-control" id="bio" name="bio" rows="3" 
+                                          placeholder="Tell us about yourself..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" onclick="Profile.resetForm()">
+                                <i class="fas fa-undo me-1"></i>Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences and Security -->
+    <div class="row">
+        <!-- Preferences -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>
+                        Preferences
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="preferences-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="timezone" class="form-label">Timezone</label>
+                                <select class="form-select" id="timezone" name="timezone">
+                                    <option value="UTC">UTC</option>
+                                    <option value="America/New_York">Eastern Time</option>
+                                    <option value="America/Chicago">Central Time</option>
+                                    <option value="America/Denver">Mountain Time</option>
+                                    <option value="America/Los_Angeles">Pacific Time</option>
+                                    <option value="Europe/London">London</option>
+                                    <option value="Europe/Paris">Paris</option>
+                                    <option value="Asia/Tokyo">Tokyo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="language" class="form-label">Language</label>
+                                <select class="form-select" id="language" name="language">
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="it">Italiano</option>
+                                    <option value="pt">Português</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="theme" class="form-label">Theme</label>
+                                <select class="form-select" id="theme" name="theme">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="auto">Auto</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="date_format" class="form-label">Date Format</label>
+                                <select class="form-select" id="date_format" name="date_format">
+                                    <option value="Y-m-d">YYYY-MM-DD</option>
+                                    <option value="m/d/Y">MM/DD/YYYY</option>
+                                    <option value="d/m/Y">DD/MM/YYYY</option>
+                                    <option value="d-m-Y">DD-MM-YYYY</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <h6 class="mt-3 mb-2">Notifications</h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="notifications_email" name="notifications_email">
+                            <label class="form-check-label" for="notifications_email">
+                                Email Notifications
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="notifications_browser" name="notifications_browser">
+                            <label class="form-check-label" for="notifications_browser">
+                                Browser Notifications
+                            </label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Security
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Change Password -->
+                    <h6 class="mb-3">Change Password</h6>
+                    <form id="password-form">
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            <small class="text-muted">At least 8 characters with uppercase, lowercase, and number</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-key me-1"></i>Change Password
+                        </button>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <!-- Two-Factor Authentication -->
+                    <h6 class="mb-3">Two-Factor Authentication</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-1">Add an extra layer of security</p>
+                            <small class="text-muted">Status: <span id="2fa-status" class="badge bg-secondary">Disabled</span></small>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="Profile.toggle2FA()">
+                            <i class="fas fa-mobile-alt me-1"></i>Setup 2FA
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Avatar Upload Modal -->
+<div class="modal fade" id="avatarUploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-camera me-2"></i>
+                    Upload Avatar
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="avatar-form" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="avatar-file" class="form-label">Choose Image</label>
+                        <input type="file" class="form-control" id="avatar-file" name="avatar" 
+                               accept="image/jpeg,image/png,image/gif,image/webp" required>
+                        <small class="text-muted">Maximum size: 5MB. Formats: JPEG, PNG, GIF, WebP</small>
+                    </div>
+                    <div id="avatar-preview" class="text-center mb-3" style="display: none;">
+                        <img id="avatar-preview-img" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px;">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="Profile.uploadAvatar()">
+                    <i class="fas fa-upload me-1"></i>Upload
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    padding: 20px;
+}
+
+.avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 3px solid #dee2e6;
+}
+
+.avatar-overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.avatar-overlay .btn {
+    padding: 5px 8px;
+    font-size: 12px;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 10px;
+    }
+    
+    .avatar-img {
+        width: 80px;
+        height: 80px;
+    }
+}
+</style>
