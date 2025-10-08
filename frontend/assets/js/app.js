@@ -276,7 +276,7 @@ const App = {
         console.log('Loading module:', moduleId);
         
         // Update active menu item
-        Menu.setActiveItem(moduleId);
+        Menu.setActiveMenuItem(moduleId);
         
         // Load module content
         this.loadModuleContent(moduleId);
@@ -352,8 +352,60 @@ const App = {
 
     // Show user profile
     showProfile: function() {
-        // Implementation for user profile modal/page
-        console.log('Show user profile');
+        console.log('Loading user profile...');
+        
+        // Load profile module directly
+        const contentArea = $('#content-area');
+        
+        // Show loading
+        contentArea.html(`
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading profile...</p>
+            </div>
+        `);
+        
+        // Load profile HTML
+        $.get('frontend/modules/profile/profile.html')
+            .done((html) => {
+                contentArea.html(html).addClass('fade-in');
+                
+                // Load profile JavaScript if not already loaded
+                if (typeof Profile === 'undefined') {
+                    $.getScript('frontend/modules/profile/profile.js')
+                        .done(() => {
+                            console.log('Profile module loaded successfully');
+                        })
+                        .fail((error) => {
+                            console.error('Error loading profile script:', error);
+                            this.showNotification('Error loading profile functionality', 'error');
+                        });
+                } else {
+                    // Profile already loaded, just initialize
+                    if (typeof Profile.init === 'function') {
+                        Profile.init();
+                    }
+                }
+                
+                // Update active menu state
+                Menu.setActiveMenuItem('profile-menu');
+                
+                // Update browser history
+                history.pushState({ module: 'profile' }, '', '#profile');
+                this.state.activeModule = 'profile';
+            })
+            .fail((error) => {
+                console.error('Error loading profile HTML:', error);
+                contentArea.html(`
+                    <div class="alert alert-danger m-4">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+                        <p>Failed to load profile module. Please try again.</p>
+                        <button class="btn btn-primary" onclick="App.showProfile()">Retry</button>
+                    </div>
+                `);
+            });
     },
 
     // Show settings

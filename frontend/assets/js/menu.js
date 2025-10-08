@@ -147,6 +147,26 @@ window.Menu = {
         .then((response) => {
             if (response.success) {
                 this.menuItems = response.data;
+                
+                // Add profile menu item if not already present
+                const hasProfile = this.menuItems.some(item => item.module_name === 'profile');
+                if (!hasProfile) {
+                    this.menuItems.push({
+                        id: 'profile-menu',
+                        uuid: 'profile-menu-uuid',
+                        parent_id: null,
+                        title: 'Profile',
+                        icon: 'fas fa-user',
+                        module_name: 'profile',
+                        sort_order: 999,
+                        level: 0,
+                        has_children: false,
+                        can_view: true,
+                        can_edit: true,
+                        can_delete: false
+                    });
+                }
+                
                 this.renderMenu();
                 Utils.log('Menu loaded:', this.menuItems);
             } else {
@@ -358,6 +378,9 @@ window.Menu = {
             case 'reports':
                 content = this.getReportsContent();
                 break;
+            case 'profile':
+                this.loadProfileModule();
+                return; // Return early since profile loads asynchronously
             default:
                 content = this.getDefaultModuleContent(moduleId);
         }
@@ -707,5 +730,55 @@ window.Menu = {
                 </div>
             </div>
         `;
+    },
+    
+    /**
+     * Load profile module
+     */
+    loadProfileModule: function() {
+        const $mainContent = $('#content-area');
+        
+        // Show loading
+        $mainContent.html(`
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading profile...</p>
+            </div>
+        `);
+        
+        // Load profile HTML
+        $.get('frontend/modules/profile/profile.html')
+            .done((html) => {
+                $mainContent.html(html).addClass('fade-in');
+                
+                // Load profile JavaScript if not already loaded
+                if (typeof Profile === 'undefined') {
+                    $.getScript('frontend/modules/profile/profile.js')
+                        .done(() => {
+                            console.log('Profile module loaded successfully');
+                        })
+                        .fail((error) => {
+                            console.error('Error loading profile script:', error);
+                            Utils.showAlert('Error loading profile functionality', 'error');
+                        });
+                } else {
+                    // Profile already loaded, just initialize
+                    if (typeof Profile.init === 'function') {
+                        Profile.init();
+                    }
+                }
+            })
+            .fail((error) => {
+                console.error('Error loading profile HTML:', error);
+                $mainContent.html(`
+                    <div class="alert alert-danger m-4">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+                        <p>Failed to load profile module. Please try again.</p>
+                        <button class="btn btn-primary" onclick="Menu.loadProfileModule()">Retry</button>
+                    </div>
+                `);
+            });
     }
 };
