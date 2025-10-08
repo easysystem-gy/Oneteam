@@ -1,23 +1,3 @@
-<?php
-/**
- * Oneteam API Documentation (Swagger UI)
- * 
- * This file serves the Swagger UI for API documentation
- */
-
-// Get the request path
-$requestUri = $_SERVER['REQUEST_URI'];
-$path = parse_url($requestUri, PHP_URL_PATH);
-
-// Check if requesting the OpenAPI spec JSON
-if (strpos($path, '/openapi.json') !== false) {
-    header('Content-Type: application/json');
-    include 'openapi.php';
-    exit();
-}
-
-// Serve Swagger UI HTML
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

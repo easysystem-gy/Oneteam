@@ -1,9 +1,8 @@
 RewriteEngine On
 
-# Handle API documentation routes
-RewriteRule ^docs/?$ index.php?endpoint=docs [L,QSA]
-RewriteRule ^docs/api/?$ index.php?endpoint=docs [L,QSA]
-RewriteRule ^openapi\.json$ index.php?endpoint=openapi.json [L,QSA]
+# Handle API documentation routes - serve static files directly
+RewriteRule ^docs/?$ docs.html [L]
+RewriteRule ^openapi\.json$ openapi.json [L]
 
 # Handle all other API routes
 RewriteCond %{REQUEST_FILENAME} !-f
