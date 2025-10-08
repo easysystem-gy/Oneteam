@@ -704,9 +704,14 @@
             "example": true,
             "description": "Whether workspace is active"
           },
+          "is_default": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether this is the default workspace"
+          },
           "user_role": {
             "type": "string",
-            "enum": ["admin", "member", "viewer"],
+            "enum": ["admin", "developer", "member", "viewer"],
             "example": "admin",
             "description": "User role in this workspace"
           },

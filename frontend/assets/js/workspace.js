@@ -64,6 +64,7 @@ window.Workspace = {
             if (response.success) {
                 this.workspaces = response.data;
                 this.updateWorkspaceSelector();
+                this.renderWorkspaceList();
                 this.setCurrentWorkspace();
                 Utils.log('Workspaces loaded:', this.workspaces);
             } else {
@@ -99,6 +100,88 @@ window.Workspace = {
         if (this.currentWorkspace) {
             $selector.val(this.currentWorkspace.id);
         }
+    },
+    
+    /**
+     * Render workspace list for selection screen
+     */
+    renderWorkspaceList: function() {
+        const $workspaceList = $('#workspace-list');
+        if ($workspaceList.length === 0) return;
+        
+        $workspaceList.empty();
+        
+        if (this.workspaces.length === 0) {
+            $workspaceList.html(`
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No workspaces available
+                    </div>
+                </div>
+            `);
+            return;
+        }
+        
+        this.workspaces.forEach((workspace) => {
+            const workspaceCard = $(`
+                <div class="col-md-6">
+                    <div class="workspace-card card h-100 cursor-pointer" data-workspace-id="${workspace.id}">
+                        <div class="card-body text-center p-4">
+                            <div class="workspace-icon mb-3">
+                                <i class="${workspace.icon || 'fas fa-briefcase'} fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="card-title mb-2">${workspace.name}</h5>
+                            <p class="card-text text-muted small mb-3">${workspace.description || 'No description'}</p>
+                            <div class="workspace-meta">
+                                <span class="badge bg-${workspace.is_active ? 'success' : 'secondary'} me-1">
+                                    ${workspace.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                                <span class="badge bg-primary">${workspace.user_role || 'Member'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            
+            $workspaceList.append(workspaceCard);
+        });
+        
+        // Add click handlers for workspace cards
+        $('.workspace-card').on('click', (e) => {
+            const workspaceId = parseInt($(e.currentTarget).data('workspace-id'));
+            this.selectWorkspace(workspaceId);
+        });
+    },
+    
+    /**
+     * Select a workspace from the selection screen
+     */
+    selectWorkspace: function(workspaceId) {
+        const workspace = this.workspaces.find(w => w.id === workspaceId);
+        
+        if (!workspace) {
+            Utils.showAlert('Workspace not found', 'error');
+            return;
+        }
+        
+        // Show loading
+        Utils.showLoading('Loading workspace...');
+        
+        // Set the workspace
+        this.setCurrentWorkspace(workspaceId);
+        
+        // Hide workspace selection screen and show main app
+        setTimeout(() => {
+            Utils.hideLoading();
+            
+            // Initialize the main application
+            if (window.App && typeof App.showMainApp === 'function') {
+                App.showMainApp();
+            }
+            
+            Utils.showAlert(`Welcome to ${workspace.name}!`, 'success');
+        }, 500);
     },
     
     /**

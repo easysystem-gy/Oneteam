@@ -194,7 +194,36 @@ function handleWorkspaces($action, $method, $input) {
             'color' => '#0d6efd',
             'icon' => 'fas fa-home',
             'is_active' => true,
-            'user_role' => 'admin'
+            'is_default' => true,
+            'user_role' => 'admin',
+            'created_at' => '2024-01-01T00:00:00Z',
+            'updated_at' => '2024-01-01T00:00:00Z'
+        ],
+        [
+            'id' => 2,
+            'uuid' => 'workspace-uuid-789012',
+            'name' => 'Development Team',
+            'description' => 'Workspace for development projects and tasks',
+            'color' => '#198754',
+            'icon' => 'fas fa-code',
+            'is_active' => true,
+            'is_default' => false,
+            'user_role' => 'developer',
+            'created_at' => '2024-01-15T00:00:00Z',
+            'updated_at' => '2024-01-15T00:00:00Z'
+        ],
+        [
+            'id' => 3,
+            'uuid' => 'workspace-uuid-345678',
+            'name' => 'Marketing Hub',
+            'description' => 'Marketing campaigns and content management',
+            'color' => '#dc3545',
+            'icon' => 'fas fa-bullhorn',
+            'is_active' => true,
+            'is_default' => false,
+            'user_role' => 'member',
+            'created_at' => '2024-02-01T00:00:00Z',
+            'updated_at' => '2024-02-01T00:00:00Z'
         ]
     ];
     
