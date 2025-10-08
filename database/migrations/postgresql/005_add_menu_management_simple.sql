@@ -11,8 +11,8 @@ SELECT
     'fas fa-cogs', 
     NULL, 
     10, 
-    1, 
-    1, 
+    true, 
+    true, 
     NOW(), 
     NOW()
 WHERE NOT EXISTS (
@@ -28,8 +28,8 @@ SELECT
     'fas fa-bars',
     'menu-management',
     3,
-    1,
-    1,
+    true,
+    true,
     NOW(),
     NOW()
 WHERE NOT EXISTS (
