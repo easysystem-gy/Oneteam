@@ -425,7 +425,7 @@ window.Menu = {
         
         console.log('=== MODULE LOADING DEBUG ===');
         console.log('Loading module:', moduleId);
-        console.log('Available cases: dashboard, users/list, users/create, workspaces/list, reports, profile, menu-management, workspace-settings, general-settings');
+        console.log('Available cases: dashboard, users/list, users/create, workspaces/list, reports, profile, menu-management, workspaces/settings, general-settings');
         
         switch (moduleId) {
             case 'dashboard':
@@ -449,9 +449,9 @@ window.Menu = {
             case 'menu-management':
                 this.loadMenuManagementModule();
                 return; // Return early since menu-management loads asynchronously
-            case 'workspace-settings':
+            case 'workspaces/settings':
                 this.loadWorkspaceSettingsModule();
-                return; // Return early since workspace-settings loads asynchronously
+                return; // Return early since workspaces/settings loads asynchronously
             case 'general-settings':
                 this.loadGeneralSettingsModule();
                 return; // Return early since general-settings loads asynchronously
