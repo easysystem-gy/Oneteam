@@ -11,8 +11,8 @@ require_once '../core/Database/DatabaseAdapterInterface.php';
 require_once '../core/Database/BaseAdapter.php';
 require_once '../core/Database/Adapters/PostgreSQLAdapter.php';
 require_once '../core/Database/Adapters/MariaDBAdapter.php';
-require_once '../core/Database/Adapters/SQLServerAdapter.php';
-require_once '../core/Database/Adapters/SQLiteAdapter.php';
+// require_once '../core/Database/Adapters/SQLServerAdapter.php';
+// require_once '../core/Database/Adapters/SQLiteAdapter.php';
 
 use Oneteam\Database\DatabaseFactory;
 
@@ -42,9 +42,9 @@ try {
     // PostgreSQL connection configuration
     $host = $_ENV['DB_HOST'] ?? 'localhost';
     $port = $_ENV['DB_PORT'] ?? '5432';
-    $dbname = $_ENV['DB_NAME'] ?? 'oneteam';
-    $username = $_ENV['DB_USERNAME'] ?? 'oneteam_user';
-    $password = $_ENV['DB_PASSWORD'] ?? '';
+    $dbname = $_ENV['DB_NAME'] ?? 'oneteamai';
+    $username = $_ENV['DB_USERNAME'] ?? 'eseadmin';
+    $password = $_ENV['DB_PASSWORD'] ?? 'eseadmin';
     
     // Create PostgreSQL connection
     $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
