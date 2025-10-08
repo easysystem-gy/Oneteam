@@ -32,8 +32,33 @@ window.Workspace = {
             const dropdownElement = document.getElementById('workspaceDropdown');
             if (dropdownElement) {
                 console.log('Initializing Bootstrap dropdown for workspace');
-                // Initialize Bootstrap dropdown manually
-                new bootstrap.Dropdown(dropdownElement);
+                console.log('Bootstrap object available:', typeof bootstrap !== 'undefined');
+                console.log('Bootstrap.Dropdown available:', typeof bootstrap.Dropdown !== 'undefined');
+                
+                // Check if dropdown is already initialized
+                let dropdownInstance = bootstrap.Dropdown.getInstance(dropdownElement);
+                if (!dropdownInstance) {
+                    console.log('Creating new Bootstrap dropdown instance');
+                    dropdownInstance = new bootstrap.Dropdown(dropdownElement);
+                } else {
+                    console.log('Bootstrap dropdown already initialized');
+                }
+                
+                // Test the dropdown programmatically
+                console.log('Testing dropdown toggle...');
+                setTimeout(() => {
+                    try {
+                        dropdownInstance.toggle();
+                        console.log('Dropdown toggle successful');
+                        setTimeout(() => {
+                            dropdownInstance.hide();
+                            console.log('Dropdown hide successful');
+                        }, 1000);
+                    } catch (error) {
+                        console.error('Error testing dropdown:', error);
+                    }
+                }, 500);
+                
             } else {
                 console.error('Workspace dropdown element not found for initialization');
             }
