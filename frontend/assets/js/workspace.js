@@ -371,7 +371,7 @@ window.Workspace = {
         document.documentElement.style.setProperty('--workspace-primary', color);
         
         // Update navbar color
-        $('.navbar-brand').css('color', color);
+        // $('.navbar-brand').css('color', color);
         
         // Update active menu items color
         $('.nav-link.active').css('color', color);

@@ -33,7 +33,7 @@ const Config = {
     app: {
         name: 'Oneteam',
         version: '1.0.0',
-        debug: false,
+        debug: true,
         locale: 'en',
         timezone: 'UTC',
         dateFormat: 'YYYY-MM-DD',
