@@ -190,29 +190,39 @@ window.Menu = {
         $menuContainer.empty();
         
         // Group menu items by level
-        const rootItems = this.menuItems.filter(item => item.level === 0);
-        const childItems = this.menuItems.filter(item => item.level > 0);
+        const rootItems = this.menuItems.filter(item => item.level === 0 || item.parent_id === null);
+        const childItems = this.menuItems.filter(item => item.level > 0 && item.parent_id !== null);
         
         Utils.log('Rendering menu - Root items:', rootItems.length);
-        Utils.log('Root items:', rootItems.map(item => ({ id: item.id, title: item.title, level: item.level })));
+        Utils.log('Root items:', rootItems.map(item => ({ id: item.id, title: item.title, level: item.level, parent_id: item.parent_id })));
         Utils.log('Child items:', childItems.map(item => ({ id: item.id, title: item.title, parent_id: item.parent_id, level: item.level })));
         
+        // Debug: Log all menu items with their hierarchy info
+        console.log('=== MENU DEBUG INFO ===');
+        this.menuItems.forEach(item => {
+            console.log(`ID: ${item.id}, Title: "${item.title}", Parent: ${item.parent_id}, Level: ${item.level}`);
+        });
+        
         rootItems.forEach((item) => {
-            const $menuItem = this.createMenuItem(item);
-            $menuContainer.append($menuItem);
+            // Find child items for this parent
+            const children = childItems.filter(child => child.parent_id == item.id);
             
-            // Find child items
-            const children = childItems.filter(child => child.parent_id === item.id);
             if (children.length > 0) {
-                const $submenu = this.createSubmenu(item.id, children);
-                $menuContainer.append($submenu);
+                // Create parent item with submenu toggle
+                const $menuItem = this.createParentMenuItem(item, children);
+                $menuContainer.append($menuItem);
+            } else {
+                // Create regular menu item
+                const $menuItem = this.createMenuItem(item);
+                $menuContainer.append($menuItem);
             }
         });
         
         // Initialize tooltips for collapsed sidebar
         this.initializeTooltips();
         
-        // Note: Using custom submenu toggle implementation instead of Bootstrap collapse
+        // Initialize submenu toggles
+        this.initializeSubmenuToggles();
     },
     
     /**
@@ -278,7 +288,55 @@ window.Menu = {
     },
     
     /**
-     * Create submenu element
+     * Create parent menu item with submenu
+     */
+    createParentMenuItem: function(item, children) {
+        const $menuItem = $(`
+            <li class="nav-item">
+                <a class="nav-link submenu-toggle" href="#" 
+                   data-bs-toggle="collapse" 
+                   data-bs-target="#submenu-${item.id}"
+                   aria-expanded="false"
+                   aria-controls="submenu-${item.id}"
+                   data-menu-id="${item.id}"
+                   title="${item.title}">
+                    <i class="${item.icon}"></i>
+                    <span class="nav-text">${item.title}</span>
+                    <i class="fas fa-chevron-down submenu-arrow ms-auto"></i>
+                </a>
+                <div class="collapse" id="submenu-${item.id}">
+                    <ul class="nav flex-column ms-3 nav-submenu">
+                        ${children.map(child => this.createChildMenuItemHTML(child)).join('')}
+                    </ul>
+                </div>
+            </li>
+        `);
+        
+        return $menuItem;
+    },
+    
+    /**
+     * Create child menu item HTML
+     */
+    createChildMenuItemHTML: function(item) {
+        const target = item.target || '_self';
+        const href = item.url || '#';
+        
+        return `
+            <li class="nav-item">
+                <a class="nav-link nav-link-child" href="${href}" target="${target}" 
+                   data-module="${item.module_name || ''}" 
+                   data-menu-id="${item.id}"
+                   title="${item.title}">
+                    <i class="${item.icon}"></i>
+                    <span class="nav-text">${item.title}</span>
+                </a>
+            </li>
+        `;
+    },
+    
+    /**
+     * Create submenu element (legacy - keeping for compatibility)
      */
     createSubmenu: function(parentId, children) {
         const $submenu = $(`
@@ -621,7 +679,49 @@ window.Menu = {
         }
     },
     
-
+    /**
+     * Initialize submenu toggles
+     */
+    initializeSubmenuToggles: function() {
+        // Handle submenu toggle clicks
+        $(document).off('click.submenu', '.submenu-toggle');
+        $(document).on('click.submenu', '.submenu-toggle', function(e) {
+            e.preventDefault();
+            
+            const $toggle = $(this);
+            const $arrow = $toggle.find('.submenu-arrow');
+            const targetId = $toggle.attr('data-bs-target');
+            const $submenu = $(targetId);
+            
+            // Toggle the submenu
+            $submenu.collapse('toggle');
+            
+            // Update arrow direction
+            $submenu.on('show.bs.collapse', function() {
+                $arrow.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                $toggle.attr('aria-expanded', 'true');
+            });
+            
+            $submenu.on('hide.bs.collapse', function() {
+                $arrow.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                $toggle.attr('aria-expanded', 'false');
+            });
+        });
+        
+        // Handle child menu item clicks
+        $(document).off('click.childmenu', '.nav-link-child');
+        $(document).on('click.childmenu', '.nav-link-child', function(e) {
+            e.preventDefault();
+            
+            const $link = $(this);
+            const moduleId = $link.data('module');
+            const menuId = $link.data('menu-id');
+            
+            if (moduleId) {
+                Menu.navigateToModule(moduleId, menuId);
+            }
+        });
+    },
     
     /**
      * Initialize module-specific components

@@ -505,3 +505,80 @@ body {
         box-shadow: none !important;
     }
 }
+
+/* Hierarchical Menu Styles */
+.submenu-toggle {
+    position: relative;
+}
+
+.submenu-arrow {
+    font-size: 0.75rem;
+    transition: transform 0.2s ease-in-out;
+}
+
+.submenu-toggle[aria-expanded="true"] .submenu-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-submenu {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left: 2px solid var(--primary-color);
+    margin-left: 1rem !important;
+    padding-left: 0.5rem;
+}
+
+.nav-link-child {
+    font-size: 0.9rem;
+    padding-left: 2rem !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.nav-link-child:hover {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.nav-link-child.active {
+    color: var(--primary-color) !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.nav-link-child i {
+    font-size: 0.8rem;
+    width: 1rem;
+    margin-right: 0.5rem;
+}
+
+/* Submenu collapse animation */
+.collapse {
+    transition: height 0.35s ease;
+}
+
+/* Parent menu item with children styling */
+.submenu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.submenu-toggle .nav-text {
+    flex: 1;
+}
+
+/* Indent child items more when sidebar is expanded */
+.sidebar:not(.collapsed) .nav-submenu {
+    margin-left: 1.5rem !important;
+}
+
+.sidebar:not(.collapsed) .nav-link-child {
+    padding-left: 2.5rem !important;
+}
+
+/* Adjust for collapsed sidebar */
+.sidebar.collapsed .nav-submenu {
+    display: none;
+}
+
+.sidebar.collapsed .submenu-arrow {
+    display: none;
+}

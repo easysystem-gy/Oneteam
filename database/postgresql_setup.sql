@@ -74,12 +74,20 @@ INSERT INTO workspaces (name, description) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insert sample menu items
+-- First insert parent items
 INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order) VALUES
 ('dashboard-uuid', 1, NULL, 'Dashboard', 'fas fa-tachometer-alt', 'dashboard', 1),
 ('users-uuid', 1, NULL, 'User Management', 'fas fa-users', NULL, 2),
-('users-list-uuid', 1, 2, 'Users List', 'fas fa-list', 'users/list', 1),
 ('reports-uuid', 1, NULL, 'Reports', 'fas fa-chart-bar', 'reports', 3),
 ('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 4)
+ON CONFLICT (uuid) DO NOTHING;
+
+-- Then insert child items using subquery to get parent ID
+INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order) VALUES
+('users-list-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'Users List', 'fas fa-list', 'users/list', 1),
+('users-roles-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'User Roles', 'fas fa-user-tag', 'users/roles', 2),
+('reports-sales-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Sales Reports', 'fas fa-chart-line', 'reports/sales', 1),
+('reports-analytics-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Analytics', 'fas fa-chart-pie', 'reports/analytics', 2)
 ON CONFLICT (uuid) DO NOTHING;
 
 -- Insert default admin user (password: admin123)
