@@ -1,0 +1,210 @@
+<!-- Menu Management Module -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-bars me-2"></i>Menu Management</h2>
+                    <p class="text-muted mb-0">Configure and organize your application menu items</p>
+                </div>
+                <button class="btn btn-primary" id="add-menu-item-btn">
+                    <i class="fas fa-plus me-2"></i>Add Menu Item
+                </button>
+            </div>
+
+            <!-- Menu Items Container -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Menu Items
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="menu-items-container">
+                        <!-- Menu items will be loaded here -->
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading menu items...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Menu Item Modal -->
+<div class="modal fade" id="menu-item-modal" tabindex="-1" aria-labelledby="menu-item-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="menu-item-modal-title">Add Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="menu-item-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-item-title" class="form-label">
+                                    Title <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="menu-item-title" 
+                                       placeholder="Enter menu item title" required>
+                                <div class="form-text">The display name for this menu item</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-item-icon" class="form-label">
+                                    Icon <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i id="icon-preview" class="fas fa-home"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="menu-item-icon" 
+                                           placeholder="fas fa-home" required>
+                                </div>
+                                <div class="form-text">FontAwesome icon class (e.g., fas fa-home)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-item-url" class="form-label">URL</label>
+                                <input type="text" class="form-control" id="menu-item-url" 
+                                       placeholder="/path/to/page or #">
+                                <div class="form-text">Direct URL or # for module-based items</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-item-module" class="form-label">Module Name</label>
+                                <input type="text" class="form-control" id="menu-item-module" 
+                                       placeholder="module-name">
+                                <div class="form-text">Module to load when clicked (optional)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-item-parent" class="form-label">Parent Menu</label>
+                                <select class="form-select" id="menu-item-parent">
+                                    <option value="">-- No Parent (Top Level) --</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                                <div class="form-text">Select parent for sub-menu items</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-item-sort-order" class="form-label">Sort Order</label>
+                                <input type="number" class="form-control" id="menu-item-sort-order" 
+                                       value="1" min="1">
+                                <div class="form-text">Display order (lower numbers appear first)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="menu-item-active" checked>
+                                <label class="form-check-label" for="menu-item-active">
+                                    Active
+                                </label>
+                                <div class="form-text">Whether this menu item is visible to users</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel-menu-item-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-menu-item-btn">
+                    <i class="fas fa-save me-2"></i>Save Menu Item
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Menu Management JavaScript -->
+<script src="../assets/js/menu-management.js"></script>
+
+<style>
+/* Custom styles for menu management */
+.menu-item-row {
+    transition: all 0.3s ease;
+}
+
+.menu-item-row:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.drag-handle {
+    cursor: move;
+}
+
+.drag-handle:hover {
+    color: var(--bs-primary);
+}
+
+.sortable-placeholder {
+    height: 60px;
+    background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    margin-bottom: 0.5rem;
+}
+
+#icon-preview {
+    transition: all 0.3s ease;
+}
+
+/* Icon preview updates */
+#menu-item-icon {
+    font-family: monospace;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .menu-item-row .col-md-1,
+    .menu-item-row .col-md-2 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-item-row .btn-group {
+        width: 100%;
+    }
+    
+    .menu-item-row .btn-group .btn {
+        flex: 1;
+    }
+}
+</style>
+
+<script>
+// Icon preview functionality
+$(document).ready(function() {
+    $('#menu-item-icon').on('input', function() {
+        const iconClass = $(this).val().trim();
+        const preview = $('#icon-preview');
+        
+        if (iconClass) {
+            // Remove all existing classes and add new ones
+            preview.attr('class', iconClass);
+        } else {
+            // Default icon
+            preview.attr('class', 'fas fa-home');
+        }
+    });
+});
+</script>

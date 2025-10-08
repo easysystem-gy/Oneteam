@@ -381,6 +381,9 @@ window.Menu = {
             case 'profile':
                 this.loadProfileModule();
                 return; // Return early since profile loads asynchronously
+            case 'menu-management':
+                this.loadMenuManagementModule();
+                return; // Return early since menu-management loads asynchronously
             default:
                 content = this.getDefaultModuleContent(moduleId);
         }
@@ -777,6 +780,60 @@ window.Menu = {
                         <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
                         <p>Failed to load profile module. Please try again.</p>
                         <button class="btn btn-primary" onclick="Menu.loadProfileModule()">Retry</button>
+                    </div>
+                `);
+            });
+    },
+    
+    /**
+     * Load menu management module
+     */
+    loadMenuManagementModule: function() {
+        const $mainContent = $('#content-area');
+        
+        // Show loading
+        $mainContent.html(`
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading menu management...</p>
+            </div>
+        `);
+        
+        // Load menu management HTML
+        $.get('frontend/modules/menu-management.html')
+            .done((html) => {
+                $mainContent.html(html).addClass('fade-in');
+                
+                // Load menu management JavaScript if not already loaded
+                if (typeof MenuManagement === 'undefined') {
+                    $.getScript('frontend/assets/js/menu-management.js')
+                        .done(() => {
+                            console.log('Menu Management module loaded successfully');
+                            // Initialize the module
+                            if (typeof MenuManagement.init === 'function') {
+                                MenuManagement.init();
+                            }
+                        })
+                        .fail((error) => {
+                            console.error('Error loading menu management script:', error);
+                            Utils.showAlert('Error loading menu management functionality', 'error');
+                        });
+                } else {
+                    // Menu Management already loaded, just initialize
+                    if (typeof MenuManagement.init === 'function') {
+                        MenuManagement.init();
+                    }
+                }
+            })
+            .fail((error) => {
+                console.error('Error loading menu management HTML:', error);
+                $mainContent.html(`
+                    <div class="alert alert-danger m-4">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+                        <p>Failed to load menu management module. Please try again.</p>
+                        <button class="btn btn-primary" onclick="Menu.loadMenuManagementModule()">Retry</button>
                     </div>
                 `);
             });

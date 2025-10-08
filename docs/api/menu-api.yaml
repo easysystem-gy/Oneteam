@@ -1,0 +1,344 @@
+openapi: 3.0.3
+info:
+  title: Oneteam Menu Management API
+  description: API for managing menu items in the Oneteam application
+  version: 1.0.0
+  contact:
+    name: Oneteam Development Team
+    email: dev@oneteam.com
+
+servers:
+  - url: /backend/api
+    description: Development server
+
+paths:
+  /menu.php:
+    get:
+      summary: Get menu items
+      description: Retrieve all menu items for the current workspace or a specific menu item
+      tags:
+        - Menu Management
+      parameters:
+        - name: id
+          in: query
+          description: ID of a specific menu item to retrieve
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MenuItemsResponse'
+                  - $ref: '#/components/schemas/MenuItem'
+        '400':
+          description: Bad request - No workspace selected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Menu item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create menu item
+      description: Create a new menu item in the current workspace
+      tags:
+        - Menu Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMenuItemRequest'
+      responses:
+        '201':
+          description: Menu item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItem'
+        '400':
+          description: Bad request - Invalid input or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update menu item
+      description: Update an existing menu item
+      tags:
+        - Menu Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMenuItemRequest'
+      responses:
+        '200':
+          description: Menu item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItem'
+        '400':
+          description: Bad request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Menu item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete menu item
+      description: Delete a menu item (only if it has no children)
+      tags:
+        - Menu Management
+      parameters:
+        - name: id
+          in: query
+          description: ID of the menu item to delete
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Menu item deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad request - Cannot delete menu item with children
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Menu item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the menu item
+          example: 1
+        workspace_id:
+          type: integer
+          description: ID of the workspace this menu item belongs to
+          example: 1
+        parent_id:
+          type: integer
+          nullable: true
+          description: ID of the parent menu item (null for top-level items)
+          example: null
+        title:
+          type: string
+          description: Display title of the menu item
+          example: "Dashboard"
+        icon:
+          type: string
+          description: FontAwesome icon class
+          example: "fas fa-tachometer-alt"
+        url:
+          type: string
+          nullable: true
+          description: Direct URL for the menu item
+          example: "/dashboard"
+        module_name:
+          type: string
+          nullable: true
+          description: Name of the module to load
+          example: "dashboard"
+        sort_order:
+          type: integer
+          description: Display order (lower numbers appear first)
+          example: 1
+        is_active:
+          type: boolean
+          description: Whether the menu item is active/visible
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2023-10-08T12:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2023-10-08T12:00:00Z"
+
+    MenuItemsResponse:
+      type: object
+      properties:
+        menu_items:
+          type: array
+          description: Flat array of all menu items
+          items:
+            $ref: '#/components/schemas/MenuItem'
+        hierarchical:
+          type: array
+          description: Hierarchical structure of menu items
+          items:
+            $ref: '#/components/schemas/HierarchicalMenuItem'
+
+    HierarchicalMenuItem:
+      allOf:
+        - $ref: '#/components/schemas/MenuItem'
+        - type: object
+          properties:
+            children:
+              type: array
+              description: Child menu items
+              items:
+                $ref: '#/components/schemas/HierarchicalMenuItem'
+
+    CreateMenuItemRequest:
+      type: object
+      required:
+        - title
+        - icon
+      properties:
+        title:
+          type: string
+          description: Display title of the menu item
+          example: "New Menu Item"
+        icon:
+          type: string
+          description: FontAwesome icon class
+          example: "fas fa-home"
+        url:
+          type: string
+          nullable: true
+          description: Direct URL for the menu item
+          example: "/new-page"
+        module_name:
+          type: string
+          nullable: true
+          description: Name of the module to load
+          example: "new-module"
+        parent_id:
+          type: integer
+          nullable: true
+          description: ID of the parent menu item
+          example: 1
+        sort_order:
+          type: integer
+          description: Display order
+          example: 1
+        is_active:
+          type: boolean
+          description: Whether the menu item is active
+          example: true
+
+    UpdateMenuItemRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateMenuItemRequest'
+        - type: object
+          required:
+            - id
+            - title
+            - icon
+          properties:
+            id:
+              type: integer
+              description: ID of the menu item to update
+              example: 1
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid request"
+
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: PHP session-based authentication
+
+security:
+  - SessionAuth: []
+
+tags:
+  - name: Menu Management
+    description: Operations for managing menu items
