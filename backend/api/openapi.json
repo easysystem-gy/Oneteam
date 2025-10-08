@@ -35,6 +35,10 @@
     {
       "name": "Users",
       "description": "User management and profiles"
+    },
+    {
+      "name": "Profile",
+      "description": "User profile management and preferences"
     }
   ],
   "paths": {
@@ -274,6 +278,314 @@
           }
         }
       }
+    },
+    "/profile": {
+      "get": {
+        "tags": ["Profile"],
+        "summary": "Get current user profile",
+        "description": "Retrieve the profile information for the authenticated user",
+        "operationId": "getUserProfile",
+        "security": [
+          {"bearerAuth": []}
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/ApiResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {"$ref": "#/components/schemas/UserProfile"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/update": {
+      "put": {
+        "tags": ["Profile"],
+        "summary": "Update user profile",
+        "description": "Update profile information for the authenticated user",
+        "operationId": "updateUserProfile",
+        "security": [
+          {"bearerAuth": []}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/ProfileUpdateRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/ApiResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {"$ref": "#/components/schemas/UserProfile"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/avatar": {
+      "post": {
+        "tags": ["Profile"],
+        "summary": "Upload user avatar",
+        "description": "Upload a new avatar image for the authenticated user",
+        "operationId": "uploadUserAvatar",
+        "security": [
+          {"bearerAuth": []}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Avatar image file (JPEG, PNG, GIF, WebP, max 5MB)"
+                  }
+                },
+                "required": ["avatar"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/ApiResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "avatar": {
+                              "type": "string",
+                              "description": "URL to the uploaded avatar"
+                            },
+                            "filename": {
+                              "type": "string",
+                              "description": "Generated filename"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid file or upload error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/password": {
+      "put": {
+        "tags": ["Profile"],
+        "summary": "Change user password",
+        "description": "Change password for the authenticated user",
+        "operationId": "changeUserPassword",
+        "security": [
+          {"bearerAuth": []}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/PasswordChangeRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid password or validation error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/preferences": {
+      "get": {
+        "tags": ["Profile"],
+        "summary": "Get user preferences",
+        "description": "Retrieve preferences for the authenticated user",
+        "operationId": "getUserPreferences",
+        "security": [
+          {"bearerAuth": []}
+        ],
+        "responses": {
+          "200": {
+            "description": "Preferences retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/ApiResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {"$ref": "#/components/schemas/UserPreferences"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Profile"],
+        "summary": "Update user preferences",
+        "description": "Update preferences for the authenticated user",
+        "operationId": "updateUserPreferences",
+        "security": [
+          {"bearerAuth": []}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/UserPreferences"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Preferences updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/ApiResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {"$ref": "#/components/schemas/UserPreferences"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid preferences data",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -478,6 +790,272 @@
             "type": "boolean",
             "example": false,
             "description": "Whether user can delete this item"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "required": ["id", "uuid", "username", "email"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1,
+            "description": "Unique user identifier"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "example": "admin-uuid-123456",
+            "description": "User UUID"
+          },
+          "username": {
+            "type": "string",
+            "example": "admin",
+            "description": "Username"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@oneteam.local",
+            "description": "User email address"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "System",
+            "description": "User first name"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Administrator",
+            "description": "User last name"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+1-555-0123",
+            "description": "User phone number"
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true,
+            "example": "System administrator with full access to all features.",
+            "description": "User biography"
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true,
+            "example": "/api/uploads/avatars/admin.jpg",
+            "description": "URL to user avatar image"
+          },
+          "timezone": {
+            "type": "string",
+            "example": "UTC",
+            "description": "User timezone"
+          },
+          "language": {
+            "type": "string",
+            "example": "en",
+            "description": "User preferred language"
+          },
+          "theme": {
+            "type": "string",
+            "enum": ["light", "dark", "auto"],
+            "example": "light",
+            "description": "User interface theme"
+          },
+          "date_format": {
+            "type": "string",
+            "example": "Y-m-d",
+            "description": "User preferred date format"
+          },
+          "time_format": {
+            "type": "string",
+            "example": "H:i:s",
+            "description": "User preferred time format"
+          },
+          "notifications_email": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether email notifications are enabled"
+          },
+          "notifications_browser": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether browser notifications are enabled"
+          },
+          "two_factor_enabled": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether two-factor authentication is enabled"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether email address is verified"
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether user account is active"
+          },
+          "is_admin": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether user has admin privileges"
+          },
+          "last_login": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2024-10-08T08:00:00Z",
+            "description": "Last login timestamp"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-01-01T00:00:00Z",
+            "description": "Account creation timestamp"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-08T08:00:00Z",
+            "description": "Profile last update timestamp"
+          }
+        }
+      },
+      "ProfileUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "John",
+            "description": "User first name"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Doe",
+            "description": "User last name"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+1-555-0123",
+            "description": "User phone number"
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true,
+            "example": "Software developer with 5 years of experience.",
+            "description": "User biography"
+          },
+          "timezone": {
+            "type": "string",
+            "example": "America/New_York",
+            "description": "User timezone"
+          },
+          "language": {
+            "type": "string",
+            "enum": ["en", "es", "fr", "de", "it", "pt", "ru", "zh", "ja"],
+            "example": "en",
+            "description": "User preferred language"
+          },
+          "theme": {
+            "type": "string",
+            "enum": ["light", "dark", "auto"],
+            "example": "light",
+            "description": "User interface theme"
+          },
+          "date_format": {
+            "type": "string",
+            "example": "Y-m-d",
+            "description": "User preferred date format"
+          },
+          "time_format": {
+            "type": "string",
+            "example": "H:i:s",
+            "description": "User preferred time format"
+          },
+          "notifications_email": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether email notifications are enabled"
+          },
+          "notifications_browser": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether browser notifications are enabled"
+          }
+        }
+      },
+      "UserPreferences": {
+        "type": "object",
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "example": "UTC",
+            "description": "User timezone"
+          },
+          "language": {
+            "type": "string",
+            "enum": ["en", "es", "fr", "de", "it", "pt", "ru", "zh", "ja"],
+            "example": "en",
+            "description": "User preferred language"
+          },
+          "theme": {
+            "type": "string",
+            "enum": ["light", "dark", "auto"],
+            "example": "light",
+            "description": "User interface theme"
+          },
+          "date_format": {
+            "type": "string",
+            "example": "Y-m-d",
+            "description": "User preferred date format"
+          },
+          "time_format": {
+            "type": "string",
+            "example": "H:i:s",
+            "description": "User preferred time format"
+          },
+          "notifications_email": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether email notifications are enabled"
+          },
+          "notifications_browser": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether browser notifications are enabled"
+          },
+          "two_factor_enabled": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether two-factor authentication is enabled"
+          }
+        }
+      },
+      "PasswordChangeRequest": {
+        "type": "object",
+        "required": ["current_password", "new_password", "confirm_password"],
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "format": "password",
+            "example": "currentPassword123",
+            "description": "Current user password"
+          },
+          "new_password": {
+            "type": "string",
+            "format": "password",
+            "example": "newPassword123",
+            "description": "New password (min 8 chars, must contain uppercase, lowercase, and number)"
+          },
+          "confirm_password": {
+            "type": "string",
+            "format": "password",
+            "example": "newPassword123",
+            "description": "Confirmation of new password"
           }
         }
       }

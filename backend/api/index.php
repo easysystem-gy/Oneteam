@@ -74,6 +74,10 @@ switch ($endpoint) {
         handleUsers($action, $method, $input);
         break;
         
+    case 'profile':
+        handleProfile($action, $method, $input);
+        break;
+        
     case 'docs':
         // Serve Swagger UI HTML as fallback if .htaccess doesn't work
         header('Content-Type: text/html; charset=utf-8');
@@ -280,4 +284,293 @@ function handleMenu($action, $method, $input) {
  */
 function handleUsers($action, $method, $input) {
     errorResponse('Users endpoint not implemented', 501);
+}
+
+/**
+ * Handle profile endpoints
+ */
+function handleProfile($action, $method, $input) {
+    // Simple authentication check (in real app, validate JWT token)
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    if (empty($authHeader) || !str_contains($authHeader, 'demo-jwt-token')) {
+        errorResponse('Unauthorized', 401);
+    }
+    
+    switch ($action) {
+        case '':
+        case 'view':
+            // GET /api/profile - Get current user profile
+            if ($method !== 'GET') {
+                errorResponse('Method not allowed', 405);
+            }
+            
+            // Demo profile data (in real app, fetch from database)
+            $profile = [
+                'id' => 1,
+                'uuid' => 'admin-uuid-123456',
+                'username' => 'admin',
+                'email' => 'admin@oneteam.local',
+                'first_name' => 'System',
+                'last_name' => 'Administrator',
+                'phone' => '+1-555-0123',
+                'bio' => 'System administrator with full access to all features.',
+                'avatar' => '/api/uploads/avatars/admin.jpg',
+                'timezone' => 'UTC',
+                'language' => 'en',
+                'theme' => 'light',
+                'date_format' => 'Y-m-d',
+                'time_format' => 'H:i:s',
+                'notifications_email' => true,
+                'notifications_browser' => true,
+                'two_factor_enabled' => false,
+                'email_verified' => true,
+                'is_active' => true,
+                'is_admin' => true,
+                'last_login' => '2024-10-08 08:00:00',
+                'created_at' => '2024-01-01 00:00:00',
+                'updated_at' => '2024-10-08 08:00:00'
+            ];
+            
+            jsonResponse([
+                'success' => true,
+                'data' => $profile
+            ]);
+            break;
+            
+        case 'update':
+            // PUT /api/profile/update - Update user profile
+            if ($method !== 'PUT') {
+                errorResponse('Method not allowed', 405);
+            }
+            
+            // Validate input
+            $allowedFields = [
+                'first_name', 'last_name', 'phone', 'bio', 'timezone', 
+                'language', 'theme', 'date_format', 'time_format',
+                'notifications_email', 'notifications_browser'
+            ];
+            
+            $updateData = [];
+            foreach ($allowedFields as $field) {
+                if (isset($input[$field])) {
+                    $updateData[$field] = $input[$field];
+                }
+            }
+            
+            if (empty($updateData)) {
+                errorResponse('No valid fields to update', 400);
+            }
+            
+            // Validate specific fields
+            if (isset($updateData['phone']) && !empty($updateData['phone'])) {
+                if (!preg_match('/^[\+]?[0-9\-\(\)\s]+$/', $updateData['phone'])) {
+                    errorResponse('Invalid phone number format', 400);
+                }
+            }
+            
+            if (isset($updateData['timezone'])) {
+                $validTimezones = timezone_identifiers_list();
+                if (!in_array($updateData['timezone'], $validTimezones)) {
+                    errorResponse('Invalid timezone', 400);
+                }
+            }
+            
+            if (isset($updateData['language'])) {
+                $validLanguages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja'];
+                if (!in_array($updateData['language'], $validLanguages)) {
+                    errorResponse('Invalid language', 400);
+                }
+            }
+            
+            if (isset($updateData['theme'])) {
+                $validThemes = ['light', 'dark', 'auto'];
+                if (!in_array($updateData['theme'], $validThemes)) {
+                    errorResponse('Invalid theme', 400);
+                }
+            }
+            
+            // In real app, update database here
+            // For demo, just return success with updated data
+            $updatedProfile = [
+                'id' => 1,
+                'uuid' => 'admin-uuid-123456',
+                'username' => 'admin',
+                'email' => 'admin@oneteam.local',
+                'first_name' => $updateData['first_name'] ?? 'System',
+                'last_name' => $updateData['last_name'] ?? 'Administrator',
+                'phone' => $updateData['phone'] ?? '+1-555-0123',
+                'bio' => $updateData['bio'] ?? 'System administrator with full access to all features.',
+                'avatar' => '/api/uploads/avatars/admin.jpg',
+                'timezone' => $updateData['timezone'] ?? 'UTC',
+                'language' => $updateData['language'] ?? 'en',
+                'theme' => $updateData['theme'] ?? 'light',
+                'date_format' => $updateData['date_format'] ?? 'Y-m-d',
+                'time_format' => $updateData['time_format'] ?? 'H:i:s',
+                'notifications_email' => $updateData['notifications_email'] ?? true,
+                'notifications_browser' => $updateData['notifications_browser'] ?? true,
+                'two_factor_enabled' => false,
+                'email_verified' => true,
+                'is_active' => true,
+                'is_admin' => true,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            jsonResponse([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'data' => $updatedProfile
+            ]);
+            break;
+            
+        case 'avatar':
+            // POST /api/profile/avatar - Upload avatar
+            if ($method !== 'POST') {
+                errorResponse('Method not allowed', 405);
+            }
+            
+            if (!isset($_FILES['avatar'])) {
+                errorResponse('No avatar file provided', 400);
+            }
+            
+            $file = $_FILES['avatar'];
+            
+            // Validate file
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                errorResponse('File upload error', 400);
+            }
+            
+            // Check file size (max 5MB)
+            if ($file['size'] > 5 * 1024 * 1024) {
+                errorResponse('File too large. Maximum size is 5MB', 400);
+            }
+            
+            // Check file type
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+            
+            if (!in_array($mimeType, $allowedTypes)) {
+                errorResponse('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed', 400);
+            }
+            
+            // Create upload directory if it doesn't exist
+            $uploadDir = __DIR__ . '/uploads/avatars/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            // Generate unique filename
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'avatar_' . time() . '_' . uniqid() . '.' . $extension;
+            $filepath = $uploadDir . $filename;
+            
+            // Move uploaded file
+            if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+                errorResponse('Failed to save uploaded file', 500);
+            }
+            
+            // In real app, update database with new avatar path
+            $avatarUrl = '/api/uploads/avatars/' . $filename;
+            
+            jsonResponse([
+                'success' => true,
+                'message' => 'Avatar uploaded successfully',
+                'data' => [
+                    'avatar' => $avatarUrl,
+                    'filename' => $filename
+                ]
+            ]);
+            break;
+            
+        case 'password':
+            // PUT /api/profile/password - Change password
+            if ($method !== 'PUT') {
+                errorResponse('Method not allowed', 405);
+            }
+            
+            $currentPassword = $input['current_password'] ?? '';
+            $newPassword = $input['new_password'] ?? '';
+            $confirmPassword = $input['confirm_password'] ?? '';
+            
+            if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+                errorResponse('All password fields are required', 400);
+            }
+            
+            if ($newPassword !== $confirmPassword) {
+                errorResponse('New password and confirmation do not match', 400);
+            }
+            
+            // Validate password strength
+            if (strlen($newPassword) < 8) {
+                errorResponse('Password must be at least 8 characters long', 400);
+            }
+            
+            if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/', $newPassword)) {
+                errorResponse('Password must contain at least one lowercase letter, one uppercase letter, and one number', 400);
+            }
+            
+            // In real app, verify current password against database
+            if ($currentPassword !== 'admin123') {
+                errorResponse('Current password is incorrect', 400);
+            }
+            
+            // In real app, hash and save new password to database
+            // For demo, just return success
+            jsonResponse([
+                'success' => true,
+                'message' => 'Password changed successfully'
+            ]);
+            break;
+            
+        case 'preferences':
+            // GET/PUT /api/profile/preferences - Get/Update user preferences
+            if ($method === 'GET') {
+                $preferences = [
+                    'timezone' => 'UTC',
+                    'language' => 'en',
+                    'theme' => 'light',
+                    'date_format' => 'Y-m-d',
+                    'time_format' => 'H:i:s',
+                    'notifications_email' => true,
+                    'notifications_browser' => true,
+                    'two_factor_enabled' => false
+                ];
+                
+                jsonResponse([
+                    'success' => true,
+                    'data' => $preferences
+                ]);
+            } elseif ($method === 'PUT') {
+                // Update preferences (similar to profile update but only preferences)
+                $allowedPrefs = [
+                    'timezone', 'language', 'theme', 'date_format', 'time_format',
+                    'notifications_email', 'notifications_browser'
+                ];
+                
+                $updateData = [];
+                foreach ($allowedPrefs as $pref) {
+                    if (isset($input[$pref])) {
+                        $updateData[$pref] = $input[$pref];
+                    }
+                }
+                
+                if (empty($updateData)) {
+                    errorResponse('No valid preferences to update', 400);
+                }
+                
+                // In real app, update database
+                jsonResponse([
+                    'success' => true,
+                    'message' => 'Preferences updated successfully',
+                    'data' => $updateData
+                ]);
+            } else {
+                errorResponse('Method not allowed', 405);
+            }
+            break;
+            
+        default:
+            errorResponse('Profile action not found', 404);
+    }
 }
