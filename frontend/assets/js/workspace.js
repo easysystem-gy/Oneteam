@@ -35,29 +35,34 @@ window.Workspace = {
                 console.log('Bootstrap object available:', typeof bootstrap !== 'undefined');
                 console.log('Bootstrap.Dropdown available:', typeof bootstrap.Dropdown !== 'undefined');
                 
-                // Check if dropdown is already initialized
-                let dropdownInstance = bootstrap.Dropdown.getInstance(dropdownElement);
-                if (!dropdownInstance) {
-                    console.log('Creating new Bootstrap dropdown instance');
-                    dropdownInstance = new bootstrap.Dropdown(dropdownElement);
-                } else {
-                    console.log('Bootstrap dropdown already initialized');
+                // Remove any existing dropdown instance first
+                let existingInstance = bootstrap.Dropdown.getInstance(dropdownElement);
+                if (existingInstance) {
+                    console.log('Disposing existing Bootstrap dropdown instance');
+                    existingInstance.dispose();
                 }
                 
-                // Test the dropdown programmatically
-                console.log('Testing dropdown toggle...');
-                setTimeout(() => {
-                    try {
-                        dropdownInstance.toggle();
-                        console.log('Dropdown toggle successful');
-                        setTimeout(() => {
-                            dropdownInstance.hide();
-                            console.log('Dropdown hide successful');
-                        }, 1000);
-                    } catch (error) {
-                        console.error('Error testing dropdown:', error);
-                    }
-                }, 500);
+                // Create new Bootstrap dropdown instance
+                console.log('Creating new Bootstrap dropdown instance');
+                const dropdownInstance = new bootstrap.Dropdown(dropdownElement);
+                
+                // Store instance for later use
+                this.dropdownInstance = dropdownInstance;
+                
+                // Add Bootstrap dropdown event listeners for debugging
+                dropdownElement.addEventListener('show.bs.dropdown', () => {
+                    console.log('Bootstrap dropdown show event fired');
+                });
+                
+                dropdownElement.addEventListener('shown.bs.dropdown', () => {
+                    console.log('Bootstrap dropdown shown event fired');
+                });
+                
+                dropdownElement.addEventListener('hide.bs.dropdown', () => {
+                    console.log('Bootstrap dropdown hide event fired');
+                });
+                
+                console.log('Bootstrap dropdown initialized successfully');
                 
             } else {
                 console.error('Workspace dropdown element not found for initialization');
@@ -69,21 +74,20 @@ window.Workspace = {
      * Bind workspace-related events
      */
     bindEvents: function() {
-        // Debug: Test if dropdown trigger is working
-        $(document).on('click', '#workspaceDropdown', (e) => {
-            console.log('Workspace dropdown clicked!', e);
-        });
-        
         // Workspace selection from dropdown
         $(document).on('click', '.workspace-dropdown-item', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            
+            console.log('Workspace item clicked:', e.target);
             
             // Get workspace ID from the clicked element or its parent
             let workspaceId = $(e.target).data('workspace-id');
             if (!workspaceId) {
                 workspaceId = $(e.target).closest('.workspace-dropdown-item').data('workspace-id');
             }
+            
+            console.log('Switching to workspace ID:', workspaceId);
             
             if (workspaceId) {
                 this.switchWorkspace(parseInt(workspaceId));
@@ -314,12 +318,11 @@ window.Workspace = {
             this.setCurrentWorkspace(workspaceId);
             
             // Close Bootstrap dropdown
-            const dropdownElement = document.getElementById('workspaceDropdown');
-            if (dropdownElement) {
-                const dropdown = bootstrap.Dropdown.getInstance(dropdownElement);
-                if (dropdown) {
-                    dropdown.hide();
-                }
+            if (this.dropdownInstance) {
+                console.log('Closing dropdown after workspace switch');
+                this.dropdownInstance.hide();
+            } else {
+                console.log('No dropdown instance found to close');
             }
             
             // Reload menu for new workspace
