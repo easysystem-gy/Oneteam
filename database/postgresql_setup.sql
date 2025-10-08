@@ -87,7 +87,9 @@ INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name,
 ('users-list-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'Users List', 'fas fa-list', 'users/list', 1),
 ('users-roles-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'User Roles', 'fas fa-user-tag', 'users/roles', 2),
 ('reports-sales-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Sales Reports', 'fas fa-chart-line', 'reports/sales', 1),
-('reports-analytics-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Analytics', 'fas fa-chart-pie', 'reports/analytics', 2)
+('reports-analytics-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Analytics', 'fas fa-chart-pie', 'reports/analytics', 2),
+('settings-workspace-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'Workspace Settings', 'fas fa-building', 'workspace-settings', 1),
+('settings-general-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'General Settings', 'fas fa-cogs', 'general-settings', 2)
 ON CONFLICT (uuid) DO NOTHING;
 
 -- Insert default admin user (password: admin123)

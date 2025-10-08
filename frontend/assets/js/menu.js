@@ -442,6 +442,12 @@ window.Menu = {
             case 'menu-management':
                 this.loadMenuManagementModule();
                 return; // Return early since menu-management loads asynchronously
+            case 'workspace-settings':
+                this.loadWorkspaceSettingsModule();
+                return; // Return early since workspace-settings loads asynchronously
+            case 'general-settings':
+                this.loadGeneralSettingsModule();
+                return; // Return early since general-settings loads asynchronously
             default:
                 content = this.getDefaultModuleContent(moduleId);
         }
@@ -934,6 +940,94 @@ window.Menu = {
                         <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
                         <p>Failed to load menu management module. Please try again.</p>
                         <button class="btn btn-primary" onclick="Menu.loadMenuManagementModule()">Retry</button>
+                    </div>
+                `);
+            });
+    },
+    
+    /**
+     * Load workspace settings module
+     */
+    loadWorkspaceSettingsModule: function() {
+        const $mainContent = $('#content-area');
+        
+        // Show loading
+        $mainContent.html(`
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading workspace settings...</p>
+            </div>
+        `);
+        
+        // Load workspace settings HTML
+        $.get('frontend/modules/workspace-settings.html')
+            .done((html) => {
+                $mainContent.html(html).addClass('fade-in');
+                
+                // Load workspace settings JavaScript if not already loaded
+                if (typeof WorkspaceSettings === 'undefined') {
+                    $.getScript('frontend/assets/js/workspace-settings.js')
+                        .done(() => {
+                            console.log('Workspace Settings module loaded successfully');
+                            // Initialize the module
+                            if (typeof WorkspaceSettings.init === 'function') {
+                                WorkspaceSettings.init();
+                            }
+                        })
+                        .fail((error) => {
+                            console.error('Error loading workspace settings script:', error);
+                            Utils.showAlert('Error loading workspace settings functionality', 'error');
+                        });
+                } else {
+                    // Workspace Settings already loaded, just initialize
+                    if (typeof WorkspaceSettings.init === 'function') {
+                        WorkspaceSettings.init();
+                    }
+                }
+            })
+            .fail((error) => {
+                console.error('Error loading workspace settings HTML:', error);
+                $mainContent.html(`
+                    <div class="alert alert-danger m-4">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+                        <p>Failed to load workspace settings module. Please try again.</p>
+                        <button class="btn btn-primary" onclick="Menu.loadWorkspaceSettingsModule()">Retry</button>
+                    </div>
+                `);
+            });
+    },
+    
+    /**
+     * Load general settings module
+     */
+    loadGeneralSettingsModule: function() {
+        const $mainContent = $('#content-area');
+        
+        // Show loading
+        $mainContent.html(`
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Loading general settings...</p>
+            </div>
+        `);
+        
+        // Load general settings HTML
+        $.get('frontend/modules/general-settings.html')
+            .done((html) => {
+                $mainContent.html(html).addClass('fade-in');
+                console.log('General Settings module loaded successfully');
+            })
+            .fail((error) => {
+                console.error('Error loading general settings HTML:', error);
+                $mainContent.html(`
+                    <div class="alert alert-danger m-4">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+                        <p>Failed to load general settings module. Please try again.</p>
+                        <button class="btn btn-primary" onclick="Menu.loadGeneralSettingsModule()">Retry</button>
                     </div>
                 `);
             });
