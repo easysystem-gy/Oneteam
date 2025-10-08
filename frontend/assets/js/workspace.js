@@ -20,12 +20,35 @@ window.Workspace = {
     init: function() {
         this.bindEvents();
         this.loadWorkspaces();
+        this.initializeDropdown();
+    },
+    
+    /**
+     * Initialize Bootstrap dropdown
+     */
+    initializeDropdown: function() {
+        // Wait for DOM to be ready
+        setTimeout(() => {
+            const dropdownElement = document.getElementById('workspaceDropdown');
+            if (dropdownElement) {
+                console.log('Initializing Bootstrap dropdown for workspace');
+                // Initialize Bootstrap dropdown manually
+                new bootstrap.Dropdown(dropdownElement);
+            } else {
+                console.error('Workspace dropdown element not found for initialization');
+            }
+        }, 100);
     },
     
     /**
      * Bind workspace-related events
      */
     bindEvents: function() {
+        // Debug: Test if dropdown trigger is working
+        $(document).on('click', '#workspaceDropdown', (e) => {
+            console.log('Workspace dropdown clicked!', e);
+        });
+        
         // Workspace selection from dropdown
         $(document).on('click', '.workspace-dropdown-item', (e) => {
             e.preventDefault();
@@ -87,7 +110,13 @@ window.Workspace = {
      */
     updateNavbarWorkspaceDropdown: function() {
         const $dropdown = $('#workspace-dropdown-menu');
-        if ($dropdown.length === 0) return;
+        console.log('Updating navbar dropdown, found element:', $dropdown.length);
+        console.log('Workspaces to add:', this.workspaces);
+        
+        if ($dropdown.length === 0) {
+            console.error('Workspace dropdown menu not found!');
+            return;
+        }
         
         // Clear existing items (keep header)
         $dropdown.find('.workspace-dropdown-item, .dropdown-divider').remove();
@@ -111,6 +140,8 @@ window.Workspace = {
             
             $dropdown.append($item);
         });
+        
+        console.log('Dropdown updated with', this.workspaces.length, 'workspaces');
     },
     
     /**
