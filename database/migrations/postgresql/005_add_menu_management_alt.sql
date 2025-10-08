@@ -1,10 +1,14 @@
--- Add Menu Management to Settings menu (PostgreSQL version)
+-- Add Menu Management to Settings menu (PostgreSQL version - Alternative for older PostgreSQL)
 -- This migration adds the menu management functionality to the system settings
+-- Uses uuid_generate_v4() instead of gen_random_uuid() for older PostgreSQL versions
+
+-- Enable uuid-ossp extension if not already enabled (may require superuser privileges)
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- First, let's add a Settings parent menu if it doesn't exist (PostgreSQL syntax)
 INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order, is_active, is_visible, created_at, updated_at)
 SELECT 
-    gen_random_uuid(),
+    uuid_generate_v4(),
     1, 
     NULL, 
     'Settings', 
@@ -22,7 +26,7 @@ WHERE NOT EXISTS (
 -- Add Menu Management under System menu (PostgreSQL syntax)
 INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order, is_active, is_visible, created_at, updated_at)
 SELECT 
-    gen_random_uuid(),
+    uuid_generate_v4(),
     1,
     (SELECT id FROM menu_items WHERE title = 'System' AND workspace_id = 1 LIMIT 1),
     'Menu Management',

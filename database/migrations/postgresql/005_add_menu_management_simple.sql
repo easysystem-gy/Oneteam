@@ -1,10 +1,10 @@
--- Add Menu Management to Settings menu (PostgreSQL version)
+-- Add Menu Management to Settings menu (PostgreSQL version - Simple without UUID)
 -- This migration adds the menu management functionality to the system settings
+-- Omits UUID column in case it's auto-generated or not required
 
 -- First, let's add a Settings parent menu if it doesn't exist (PostgreSQL syntax)
-INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order, is_active, is_visible, created_at, updated_at)
+INSERT INTO menu_items (workspace_id, parent_id, title, icon, module_name, sort_order, is_active, is_visible, created_at, updated_at)
 SELECT 
-    gen_random_uuid(),
     1, 
     NULL, 
     'Settings', 
@@ -20,9 +20,8 @@ WHERE NOT EXISTS (
 );
 
 -- Add Menu Management under System menu (PostgreSQL syntax)
-INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order, is_active, is_visible, created_at, updated_at)
+INSERT INTO menu_items (workspace_id, parent_id, title, icon, module_name, sort_order, is_active, is_visible, created_at, updated_at)
 SELECT 
-    gen_random_uuid(),
     1,
     (SELECT id FROM menu_items WHERE title = 'System' AND workspace_id = 1 LIMIT 1),
     'Menu Management',
