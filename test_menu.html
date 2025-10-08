@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Menu API Test - PostgreSQL</h1>
+    
+    <button onclick="testMenuAPI()">Test Menu API</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function addResult(message, isError = false) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = 'result ' + (isError ? 'error' : 'success');
+            div.innerHTML = '<strong>' + new Date().toLocaleTimeString() + ':</strong> ' + message;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testMenuAPI() {
+            addResult('Testing Menu API...');
+            
+            try {
+                const response = await fetch('/api/menu', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                addResult(`Response Status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`Response received: ${JSON.stringify(data, null, 2)}`);
+                    
+                    if (data.success && data.data) {
+                        addResult(`✅ Menu API working! Found ${data.data.length} menu items`);
+                        
+                        // Display menu items
+                        data.data.forEach(item => {
+                            addResult(`📋 Menu Item: ${item.title} (${item.icon}) - Module: ${item.module_name || 'N/A'}`);
+                        });
+                    } else {
+                        addResult(`❌ API returned success=false: ${data.message || 'Unknown error'}`, true);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    addResult(`❌ HTTP Error ${response.status}: ${errorText}`, true);
+                }
+            } catch (error) {
+                addResult(`❌ Network Error: ${error.message}`, true);
+            }
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            addResult('Page loaded. Click "Test Menu API" to test the menu endpoint.');
+        });
+    </script>
+</body>
+</html>

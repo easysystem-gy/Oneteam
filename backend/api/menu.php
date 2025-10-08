@@ -39,39 +39,59 @@ $method = $_SERVER['REQUEST_METHOD'];
 $input = json_decode(file_get_contents('php://input'), true);
 
 try {
-    // For testing purposes, create a simple SQLite connection
-    // TODO: Replace with proper database factory when database is configured
-    $dbPath = __DIR__ . '/../database/oneteam.db';
-    $dbDir = dirname($dbPath);
+    // PostgreSQL connection configuration
+    $host = $_ENV['DB_HOST'] ?? 'localhost';
+    $port = $_ENV['DB_PORT'] ?? '5432';
+    $dbname = $_ENV['DB_NAME'] ?? 'oneteam';
+    $username = $_ENV['DB_USERNAME'] ?? 'oneteam_user';
+    $password = $_ENV['DB_PASSWORD'] ?? '';
     
-    // Create database directory if it doesn't exist
-    if (!is_dir($dbDir)) {
-        mkdir($dbDir, 0755, true);
-    }
+    // Create PostgreSQL connection
+    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+    $conn = new PDO($dsn, $username, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
     
-    // Create SQLite connection
-    $conn = new PDO("sqlite:$dbPath");
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Create menu table if it doesn't exist
+    // Create menu table if it doesn't exist (PostgreSQL syntax)
     $conn->exec("
         CREATE TABLE IF NOT EXISTS menu_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uuid TEXT UNIQUE NOT NULL,
+            id SERIAL PRIMARY KEY,
+            uuid VARCHAR(255) UNIQUE NOT NULL,
             workspace_id INTEGER NOT NULL DEFAULT 1,
-            parent_id INTEGER NULL,
-            title TEXT NOT NULL,
-            icon TEXT DEFAULT 'fas fa-circle',
-            module_name TEXT,
+            parent_id INTEGER NULL REFERENCES menu_items(id) ON DELETE CASCADE,
+            title VARCHAR(255) NOT NULL,
+            icon VARCHAR(100) DEFAULT 'fas fa-circle',
+            module_name VARCHAR(255),
             sort_order INTEGER DEFAULT 0,
-            is_active INTEGER DEFAULT 1,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (parent_id) REFERENCES menu_items(id) ON DELETE CASCADE
+            is_active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ");
     
-    // Insert some sample data if table is empty
+    // Create workspace table if it doesn't exist
+    $conn->exec("
+        CREATE TABLE IF NOT EXISTS workspaces (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            description TEXT,
+            is_active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    
+    // Insert default workspace if none exists
+    $workspaceCount = $conn->query("SELECT COUNT(*) FROM workspaces")->fetchColumn();
+    if ($workspaceCount == 0) {
+        $conn->exec("
+            INSERT INTO workspaces (name, description) VALUES
+            ('Default Workspace', 'Default workspace for Oneteam application')
+        ");
+    }
+    
+    // Insert some sample menu data if table is empty
     $count = $conn->query("SELECT COUNT(*) FROM menu_items")->fetchColumn();
     if ($count == 0) {
         $conn->exec("
