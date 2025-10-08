@@ -368,6 +368,9 @@ body {
     max-height: 400px;
     overflow-y: auto;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+    z-index: 1050 !important;
+    background-color: white !important;
+    border: 2px solid red !important; /* Debug border */
 }
 
 .workspace-dropdown-item {

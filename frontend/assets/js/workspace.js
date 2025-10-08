@@ -52,10 +52,32 @@ window.Workspace = {
                 // Add Bootstrap dropdown event listeners for debugging
                 dropdownElement.addEventListener('show.bs.dropdown', () => {
                     console.log('Bootstrap dropdown show event fired');
+                    
+                    // Check dropdown menu element
+                    const dropdownMenu = document.getElementById('workspace-dropdown-menu');
+                    if (dropdownMenu) {
+                        console.log('Dropdown menu element found');
+                        const styles = window.getComputedStyle(dropdownMenu);
+                        console.log('Dropdown menu display:', styles.display);
+                        console.log('Dropdown menu visibility:', styles.visibility);
+                        console.log('Dropdown menu opacity:', styles.opacity);
+                        console.log('Dropdown menu z-index:', styles.zIndex);
+                        console.log('Dropdown menu position:', styles.position);
+                    } else {
+                        console.log('Dropdown menu element NOT found');
+                    }
                 });
                 
                 dropdownElement.addEventListener('shown.bs.dropdown', () => {
                     console.log('Bootstrap dropdown shown event fired');
+                    
+                    // Double-check after shown
+                    const dropdownMenu = document.getElementById('workspace-dropdown-menu');
+                    if (dropdownMenu) {
+                        const styles = window.getComputedStyle(dropdownMenu);
+                        console.log('After shown - display:', styles.display);
+                        console.log('After shown - visibility:', styles.visibility);
+                    }
                 });
                 
                 dropdownElement.addEventListener('hide.bs.dropdown', () => {
@@ -63,6 +85,22 @@ window.Workspace = {
                 });
                 
                 console.log('Bootstrap dropdown initialized successfully');
+                
+                // Add a manual test button for debugging
+                setTimeout(() => {
+                    console.log('Testing manual dropdown toggle...');
+                    try {
+                        dropdownInstance.show();
+                        console.log('Manual dropdown.show() called successfully');
+                        
+                        setTimeout(() => {
+                            dropdownInstance.hide();
+                            console.log('Manual dropdown.hide() called successfully');
+                        }, 2000);
+                    } catch (error) {
+                        console.error('Error in manual dropdown test:', error);
+                    }
+                }, 1000);
                 
             } else {
                 console.error('Workspace dropdown element not found for initialization');
