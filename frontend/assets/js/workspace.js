@@ -26,24 +26,19 @@ window.Workspace = {
      * Bind workspace-related events
      */
     bindEvents: function() {
-        // Workspace dropdown toggle
-        $(document).on('click', '.workspace-dropdown-trigger', (e) => {
-            e.preventDefault();
-            const $dropdown = $('.workspace-dropdown-menu');
-            $dropdown.toggleClass('show');
-        });
-        
         // Workspace selection from dropdown
         $(document).on('click', '.workspace-dropdown-item', (e) => {
             e.preventDefault();
-            const workspaceId = parseInt($(e.target).data('workspace-id'));
-            this.switchWorkspace(workspaceId);
-        });
-        
-        // Close dropdown when clicking outside
-        $(document).on('click', (e) => {
-            if (!$(e.target).closest('.workspace-dropdown-trigger, .workspace-dropdown-menu').length) {
-                $('.workspace-dropdown-menu').removeClass('show');
+            e.stopPropagation();
+            
+            // Get workspace ID from the clicked element or its parent
+            let workspaceId = $(e.target).data('workspace-id');
+            if (!workspaceId) {
+                workspaceId = $(e.target).closest('.workspace-dropdown-item').data('workspace-id');
+            }
+            
+            if (workspaceId) {
+                this.switchWorkspace(parseInt(workspaceId));
             }
         });
         
@@ -262,8 +257,14 @@ window.Workspace = {
         setTimeout(() => {
             this.setCurrentWorkspace(workspaceId);
             
-            // Close dropdown
-            $('.workspace-dropdown-menu').removeClass('show');
+            // Close Bootstrap dropdown
+            const dropdownElement = document.getElementById('workspaceDropdown');
+            if (dropdownElement) {
+                const dropdown = bootstrap.Dropdown.getInstance(dropdownElement);
+                if (dropdown) {
+                    dropdown.hide();
+                }
+            }
             
             // Reload menu for new workspace
             if (window.Menu) {

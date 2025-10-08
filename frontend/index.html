@@ -97,11 +97,11 @@
                 <div class="navbar-nav me-auto">
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle workspace-dropdown-trigger" href="#" id="workspaceDropdown" role="button" 
-                           data-dropdown-target=".workspace-dropdown-menu" aria-expanded="false">
+                           data-bs-toggle="dropdown" aria-expanded="false">
                             <i id="current-workspace-icon" class="fas fa-briefcase me-2"></i>
                             <span id="current-workspace-name">Select Workspace</span>
                         </a>
-                        <ul class="dropdown-menu workspace-dropdown-menu" id="workspace-dropdown-menu">
+                        <ul class="dropdown-menu workspace-dropdown-menu" id="workspace-dropdown-menu" aria-labelledby="workspaceDropdown">
                             <li class="dropdown-header">Available Workspaces</li>
                             <!-- Workspaces will be loaded here -->
                         </ul>
