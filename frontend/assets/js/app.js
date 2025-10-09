@@ -97,6 +97,13 @@ const App = {
         popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl);
         });
+        
+        // Initialize dropdowns (ensure they work properly)
+        const dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+        dropdownTriggerList.map(function (dropdownTriggerEl) {
+            console.log('Initializing Bootstrap dropdown for:', dropdownTriggerEl.id);
+            return new bootstrap.Dropdown(dropdownTriggerEl);
+        });
     },
 
     // Check authentication status
