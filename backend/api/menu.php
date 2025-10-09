@@ -64,6 +64,7 @@ try {
             icon VARCHAR(100) DEFAULT 'fas fa-circle',
             module_name VARCHAR(255),
             sort_order INTEGER DEFAULT 0,
+            level INTEGER DEFAULT 0,
             is_active BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -95,12 +96,12 @@ try {
     $count = $conn->query("SELECT COUNT(*) FROM menu_items")->fetchColumn();
     if ($count == 0) {
         $conn->exec("
-            INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order) VALUES
-            ('dashboard-uuid', 1, NULL, 'Dashboard', 'fas fa-tachometer-alt', 'dashboard', 1),
-            ('users-uuid', 1, NULL, 'User Management', 'fas fa-users', NULL, 2),
-            ('users-list-uuid', 1, 2, 'Users List', 'fas fa-list', 'users/list', 1),
-            ('reports-uuid', 1, NULL, 'Reports', 'fas fa-chart-bar', 'reports', 3),
-            ('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 4)
+            INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order, level) VALUES
+            ('dashboard-uuid', 1, NULL, 'Dashboard', 'fas fa-tachometer-alt', 'dashboard', 1, 0),
+            ('users-uuid', 1, NULL, 'User Management', 'fas fa-users', NULL, 2, 0),
+            ('users-list-uuid', 1, 2, 'Users List', 'fas fa-list', 'users/list', 1, 1),
+            ('reports-uuid', 1, NULL, 'Reports', 'fas fa-chart-bar', 'reports', 3, 0),
+            ('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 4, 0)
         ");
     }
     
@@ -142,7 +143,7 @@ function handleGet($conn, $params) {
         // Get single menu item
         $stmt = $conn->prepare("
             SELECT id, uuid, workspace_id, parent_id, title, icon, module_name, 
-                   sort_order, is_active, created_at, updated_at
+                   sort_order, level, is_active, created_at, updated_at
             FROM menu_items 
             WHERE id = ? AND workspace_id = ?
         ");
@@ -159,7 +160,7 @@ function handleGet($conn, $params) {
         // Get all menu items for workspace
         $stmt = $conn->prepare("
             SELECT id, uuid, workspace_id, parent_id, title, icon, module_name, 
-                   sort_order, is_active, created_at, updated_at
+                   sort_order, level, is_active, created_at, updated_at
             FROM menu_items 
             WHERE workspace_id = ? 
             ORDER BY sort_order ASC, title ASC
@@ -214,10 +215,19 @@ function handlePost($conn, $input) {
     $stmt->execute([$workspaceId, $parentId]);
     $nextOrder = $stmt->fetchColumn();
     
+    // Calculate level based on parent
+    $level = 0;
+    if ($parentId) {
+        $stmt = $conn->prepare("SELECT level FROM menu_items WHERE id = ?");
+        $stmt->execute([$parentId]);
+        $parentLevel = $stmt->fetchColumn();
+        $level = $parentLevel + 1;
+    }
+    
     // Insert new menu item
     $stmt = $conn->prepare("
-        INSERT INTO menu_items (workspace_id, parent_id, title, icon, url, module_name, sort_order, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO menu_items (workspace_id, parent_id, title, icon, url, module_name, sort_order, level, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
     $result = $stmt->execute([
@@ -228,6 +238,7 @@ function handlePost($conn, $input) {
         $input['url'] ?? null,
         $input['module_name'] ?? null,
         $nextOrder,
+        $level,
         $input['is_active'] ?? true
     ]);
     
@@ -237,7 +248,7 @@ function handlePost($conn, $input) {
         // Return the created menu item
         $stmt = $conn->prepare("
             SELECT id, workspace_id, parent_id, title, icon, url, module_name, 
-                   sort_order, is_active, created_at, updated_at
+                   sort_order, level, is_active, created_at, updated_at
             FROM menu_items 
             WHERE id = ?
         ");
@@ -277,11 +288,21 @@ function handlePut($conn, $input) {
         return;
     }
     
+    // Calculate new level based on parent
+    $level = 0;
+    $parentId = $input['parent_id'] ?? null;
+    if ($parentId) {
+        $stmt = $conn->prepare("SELECT level FROM menu_items WHERE id = ?");
+        $stmt->execute([$parentId]);
+        $parentLevel = $stmt->fetchColumn();
+        $level = $parentLevel + 1;
+    }
+    
     // Update menu item
     $stmt = $conn->prepare("
         UPDATE menu_items 
         SET title = ?, icon = ?, url = ?, module_name = ?, 
-            parent_id = ?, sort_order = ?, is_active = ?, updated_at = NOW()
+            parent_id = ?, sort_order = ?, level = ?, is_active = ?, updated_at = NOW()
         WHERE id = ? AND workspace_id = ?
     ");
     
@@ -290,8 +311,9 @@ function handlePut($conn, $input) {
         $input['icon'],
         $input['url'] ?? null,
         $input['module_name'] ?? null,
-        $input['parent_id'] ?? null,
+        $parentId,
         $input['sort_order'],
+        $level,
         $input['is_active'] ?? true,
         $input['id'],
         $workspaceId

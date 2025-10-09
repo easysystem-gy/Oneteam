@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
     icon VARCHAR(100) DEFAULT 'fas fa-circle',
     module_name VARCHAR(255),
     sort_order INTEGER DEFAULT 0,
+    level INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -74,24 +75,24 @@ INSERT INTO workspaces (name, description) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insert sample menu items
--- First insert parent items
-INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order) VALUES
-('dashboard-uuid', 1, NULL, 'Dashboard', 'fas fa-tachometer-alt', 'dashboard', 1),
-('users-uuid', 1, NULL, 'User Management', 'fas fa-users', NULL, 2),
-('reports-uuid', 1, NULL, 'Reports', 'fas fa-chart-bar', 'reports', 3),
-('system-uuid', 1, NULL, 'System', 'fas fa-server', NULL, 4),
-('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 5)
+-- First insert parent items (level 0)
+INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order, level) VALUES
+('dashboard-uuid', 1, NULL, 'Dashboard', 'fas fa-tachometer-alt', 'dashboard', 1, 0),
+('users-uuid', 1, NULL, 'User Management', 'fas fa-users', NULL, 2, 0),
+('reports-uuid', 1, NULL, 'Reports', 'fas fa-chart-bar', 'reports', 3, 0),
+('system-uuid', 1, NULL, 'System', 'fas fa-server', NULL, 4, 0),
+('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 5, 0)
 ON CONFLICT (uuid) DO NOTHING;
 
--- Then insert child items using subquery to get parent ID
-INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order) VALUES
-('users-list-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'Users List', 'fas fa-list', 'users/list', 1),
-('users-roles-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'User Roles', 'fas fa-user-tag', 'users/roles', 2),
-('reports-sales-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Sales Reports', 'fas fa-chart-line', 'reports/sales', 1),
-('reports-analytics-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Analytics', 'fas fa-chart-pie', 'reports/analytics', 2),
-('system-menu-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'system-uuid'), 'Menu Management', 'fas fa-bars', 'system/menu', 1),
-('settings-workspace-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'Workspace Settings', 'fas fa-building', 'workspaces/settings', 1),
-('settings-general-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'General Settings', 'fas fa-cogs', 'general-settings', 2)
+-- Then insert child items using subquery to get parent ID (level 1)
+INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name, sort_order, level) VALUES
+('users-list-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'Users List', 'fas fa-list', 'users/list', 1, 1),
+('users-roles-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'User Roles', 'fas fa-user-tag', 'users/roles', 2, 1),
+('reports-sales-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Sales Reports', 'fas fa-chart-line', 'reports/sales', 1, 1),
+('reports-analytics-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Analytics', 'fas fa-chart-pie', 'reports/analytics', 2, 1),
+('system-menu-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'system-uuid'), 'Menu Management', 'fas fa-bars', 'system/menu', 1, 1),
+('settings-workspace-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'Workspace Settings', 'fas fa-building', 'workspaces/settings', 1, 1),
+('settings-general-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'General Settings', 'fas fa-cogs', 'general-settings', 2, 1)
 ON CONFLICT (uuid) DO NOTHING;
 
 -- Insert default admin user (password: admin123)
