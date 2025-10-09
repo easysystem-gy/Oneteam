@@ -133,16 +133,25 @@
         // Check for conflicting event listeners
         console.log('=== CHECKING FOR CONFLICTING EVENT LISTENERS ===');
         
+        // Note: getEventListeners is only available in Chrome DevTools console
         // Check if there are any other click handlers on the document
-        const documentClickHandlers = getEventListeners ? getEventListeners(document) : null;
-        if (documentClickHandlers && documentClickHandlers.click) {
-            console.log('Document click handlers found:', documentClickHandlers.click.length);
-        }
-        
-        // Check if there are any other click handlers on the dropdown element
-        const dropdownClickHandlers = getEventListeners ? getEventListeners(dropdownElement) : null;
-        if (dropdownClickHandlers && dropdownClickHandlers.click) {
-            console.log('Dropdown click handlers found:', dropdownClickHandlers.click.length);
+        if (typeof getEventListeners !== 'undefined') {
+            try {
+                const documentClickHandlers = getEventListeners(document);
+                if (documentClickHandlers && documentClickHandlers.click) {
+                    console.log('Document click handlers found:', documentClickHandlers.click.length);
+                }
+                
+                // Check if there are any other click handlers on the dropdown element
+                const dropdownClickHandlers = getEventListeners(dropdownElement);
+                if (dropdownClickHandlers && dropdownClickHandlers.click) {
+                    console.log('Dropdown click handlers found:', dropdownClickHandlers.click.length);
+                }
+            } catch (error) {
+                console.log('getEventListeners not available (normal in production)');
+            }
+        } else {
+            console.log('getEventListeners not available - use Chrome DevTools console to check event listeners manually');
         }
         
         console.log('=== DROPDOWN DEBUG COMPLETE ===');
