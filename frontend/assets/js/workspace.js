@@ -86,6 +86,7 @@ window.Workspace = {
                 
                 console.log('Bootstrap dropdown initialized successfully');
                 
+                /*
                 // Add a manual test button for debugging
                 setTimeout(() => {
                     console.log('Testing manual dropdown toggle...');
@@ -101,7 +102,7 @@ window.Workspace = {
                         console.error('Error in manual dropdown test:', error);
                     }
                 }, 1000);
-                
+                */
             } else {
                 console.error('Workspace dropdown element not found for initialization');
             }
