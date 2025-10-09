@@ -168,16 +168,23 @@ function handleGet($conn, $params) {
         $stmt->execute([$workspaceId]);
         $menuItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Add level information to menu items
-        $menuItemsWithLevels = addLevelsToMenuItems($menuItems);
+        // Add additional properties to menu items (but keep database level values)
+        foreach ($menuItems as &$item) {
+            $item['has_children'] = hasChildren($item['id'], $menuItems);
+            $item['can_view'] = true; // Default permissions
+            $item['can_edit'] = true;
+            $item['can_delete'] = true;
+            // Convert level to integer to ensure proper type
+            $item['level'] = (int)$item['level'];
+        }
         
         // Build hierarchical structure
-        $hierarchicalMenu = buildMenuHierarchy($menuItemsWithLevels);
+        $hierarchicalMenu = buildMenuHierarchy($menuItems);
         
         echo json_encode([
             'success' => true,
-            'data' => $menuItemsWithLevels,
-            'menu_items' => $menuItemsWithLevels,
+            'data' => $menuItems,
+            'menu_items' => $menuItems,
             'hierarchical' => $hierarchicalMenu
         ]);
     }
@@ -379,46 +386,8 @@ function handleDelete($conn, $params) {
     }
 }
 
-/**
- * Add level information to menu items
- */
-function addLevelsToMenuItems($menuItems) {
-    $itemsWithLevels = [];
-    $itemsById = [];
-    
-    // Create lookup array
-    foreach ($menuItems as $item) {
-        $itemsById[$item['id']] = $item;
-    }
-    
-    // Calculate levels
-    foreach ($menuItems as $item) {
-        $level = calculateItemLevel($item, $itemsById);
-        $item['level'] = $level;
-        $item['has_children'] = hasChildren($item['id'], $menuItems);
-        $item['can_view'] = true; // Default permissions
-        $item['can_edit'] = true;
-        $item['can_delete'] = true;
-        $itemsWithLevels[] = $item;
-    }
-    
-    return $itemsWithLevels;
-}
-
-/**
- * Calculate the level of a menu item
- */
-function calculateItemLevel($item, $itemsById, $level = 0) {
-    if ($item['parent_id'] === null) {
-        return 0;
-    }
-    
-    if (isset($itemsById[$item['parent_id']])) {
-        return calculateItemLevel($itemsById[$item['parent_id']], $itemsById, $level + 1);
-    }
-    
-    return $level;
-}
+// Removed addLevelsToMenuItems and calculateItemLevel functions
+// Level is now stored directly in the database for better performance
 
 /**
  * Check if item has children
