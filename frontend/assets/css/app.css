@@ -363,6 +363,12 @@ body {
     color: white !important;
 }
 
+/* Ensure child elements don't interfere with dropdown clicks */
+.workspace-dropdown-trigger *,
+.dropdown-toggle * {
+    pointer-events: none;
+}
+
 .workspace-dropdown-menu {
     min-width: 300px;
     max-height: 400px;
