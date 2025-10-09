@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Test</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 50px;
+            background-color: #f8f9fa;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .workspace-dropdown-menu {
+            min-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+            z-index: 1050 !important;
+            background-color: white !important;
+            border: 2px solid red !important; /* Debug border */
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>Bootstrap Dropdown Test</h2>
+        <p>Testing if Bootstrap dropdown works correctly:</p>
+        
+        <!-- Test 1: Basic Bootstrap Dropdown -->
+        <div class="mb-4">
+            <h4>Test 1: Basic Bootstrap Dropdown</h4>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="basicDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Basic Dropdown
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="basicDropdown">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Test 2: Workspace Dropdown (Exact Copy) -->
+        <div class="mb-4">
+            <h4>Test 2: Workspace Dropdown (Exact Copy)</h4>
+            <div class="navbar-nav">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle workspace-dropdown-trigger" href="#" id="workspaceDropdown" role="button" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i id="current-workspace-icon" class="fas fa-briefcase me-2"></i>
+                        <span id="current-workspace-name">Select Workspace</span>
+                    </a>
+                    <ul class="dropdown-menu workspace-dropdown-menu" id="workspace-dropdown-menu" aria-labelledby="workspaceDropdown">
+                        <li class="dropdown-header">Available Workspaces</li>
+                        <li><a class="dropdown-item" href="#">Workspace 1</a></li>
+                        <li><a class="dropdown-item" href="#">Workspace 2</a></li>
+                        <li><a class="dropdown-item" href="#">Workspace 3</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test 3: Manual JavaScript Control -->
+        <div class="mb-4">
+            <h4>Test 3: Manual JavaScript Control</h4>
+            <button class="btn btn-primary" onclick="testManualDropdown()">Test Manual Dropdown Toggle</button>
+            <button class="btn btn-info" onclick="checkBootstrap()">Check Bootstrap</button>
+            <button class="btn btn-warning" onclick="debugDropdown()">Debug Dropdown</button>
+        </div>
+        
+        <!-- Debug Output -->
+        <div class="mb-4">
+            <h4>Debug Output:</h4>
+            <div id="debug-output" style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+    
+    <script>
+        let debugOutput = document.getElementById('debug-output');
+        
+        function log(message) {
+            console.log(message);
+            debugOutput.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+        }
+        
+        function checkBootstrap() {
+            log('=== Bootstrap Check ===');
+            log('Bootstrap available: ' + (typeof bootstrap !== 'undefined'));
+            log('Bootstrap.Dropdown available: ' + (typeof bootstrap !== 'undefined' && typeof bootstrap.Dropdown !== 'undefined'));
+            
+            if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                log('Bootstrap version: ' + (bootstrap.Tooltip?.VERSION || 'Unknown'));
+            }
+        }
+        
+        function testManualDropdown() {
+            log('=== Manual Dropdown Test ===');
+            const dropdownElement = document.getElementById('workspaceDropdown');
+            
+            if (!dropdownElement) {
+                log('ERROR: Dropdown element not found!');
+                return;
+            }
+            
+            log('Dropdown element found');
+            
+            try {
+                // Get or create Bootstrap dropdown instance
+                let dropdownInstance = bootstrap.Dropdown.getInstance(dropdownElement);
+                if (!dropdownInstance) {
+                    log('Creating new Bootstrap dropdown instance...');
+                    dropdownInstance = new bootstrap.Dropdown(dropdownElement);
+                } else {
+                    log('Using existing Bootstrap dropdown instance');
+                }
+                
+                log('Attempting to toggle dropdown...');
+                dropdownInstance.toggle();
+                log('Dropdown toggle called successfully');
+                
+            } catch (error) {
+                log('ERROR in manual dropdown test: ' + error.message);
+                log('Error stack: ' + error.stack);
+            }
+        }
+        
+        function debugDropdown() {
+            log('=== Dropdown Debug ===');
+            const dropdownElement = document.getElementById('workspaceDropdown');
+            const dropdownMenu = document.getElementById('workspace-dropdown-menu');
+            
+            if (dropdownElement) {
+                log('Dropdown trigger element found');
+                log('- ID: ' + dropdownElement.id);
+                log('- Classes: ' + dropdownElement.className);
+                log('- data-bs-toggle: ' + dropdownElement.getAttribute('data-bs-toggle'));
+                log('- aria-expanded: ' + dropdownElement.getAttribute('aria-expanded'));
+                
+                const computedStyle = window.getComputedStyle(dropdownElement);
+                log('- Display: ' + computedStyle.display);
+                log('- Visibility: ' + computedStyle.visibility);
+                log('- Pointer events: ' + computedStyle.pointerEvents);
+            } else {
+                log('ERROR: Dropdown trigger element not found!');
+            }
+            
+            if (dropdownMenu) {
+                log('Dropdown menu element found');
+                log('- ID: ' + dropdownMenu.id);
+                log('- Classes: ' + dropdownMenu.className);
+                
+                const computedStyle = window.getComputedStyle(dropdownMenu);
+                log('- Display: ' + computedStyle.display);
+                log('- Visibility: ' + computedStyle.visibility);
+                log('- Position: ' + computedStyle.position);
+                log('- Z-index: ' + computedStyle.zIndex);
+            } else {
+                log('ERROR: Dropdown menu element not found!');
+            }
+            
+            // Check for Bootstrap instance
+            const instance = bootstrap.Dropdown.getInstance(dropdownElement);
+            log('Bootstrap instance exists: ' + (instance !== null));
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('=== Page Loaded ===');
+            checkBootstrap();
+            
+            // Add event listeners to workspace dropdown
+            const dropdownElement = document.getElementById('workspaceDropdown');
+            if (dropdownElement) {
+                dropdownElement.addEventListener('show.bs.dropdown', function() {
+                    log('Bootstrap dropdown show event fired');
+                });
+                
+                dropdownElement.addEventListener('shown.bs.dropdown', function() {
+                    log('Bootstrap dropdown shown event fired');
+                });
+                
+                dropdownElement.addEventListener('hide.bs.dropdown', function() {
+                    log('Bootstrap dropdown hide event fired');
+                });
+                
+                dropdownElement.addEventListener('click', function(e) {
+                    log('Click event on dropdown trigger');
+                    log('- Default prevented: ' + e.defaultPrevented);
+                    log('- Propagation stopped: ' + e.cancelBubble);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

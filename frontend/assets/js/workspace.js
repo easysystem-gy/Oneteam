@@ -27,84 +27,27 @@ window.Workspace = {
      * Initialize Bootstrap dropdown
      */
     initializeDropdown: function() {
-        // Wait for DOM to be ready
+        // Bootstrap dropdowns work automatically with data-bs-toggle="dropdown"
+        // Just add event listeners for debugging if needed
         setTimeout(() => {
             const dropdownElement = document.getElementById('workspaceDropdown');
             if (dropdownElement) {
-                console.log('Initializing Bootstrap dropdown for workspace');
-                console.log('Bootstrap object available:', typeof bootstrap !== 'undefined');
-                console.log('Bootstrap.Dropdown available:', typeof bootstrap.Dropdown !== 'undefined');
+                console.log('Workspace dropdown element found - Bootstrap will handle it automatically');
                 
-                // Remove any existing dropdown instance first
-                let existingInstance = bootstrap.Dropdown.getInstance(dropdownElement);
-                if (existingInstance) {
-                    console.log('Disposing existing Bootstrap dropdown instance');
-                    existingInstance.dispose();
-                }
-                
-                // Create new Bootstrap dropdown instance
-                console.log('Creating new Bootstrap dropdown instance');
-                const dropdownInstance = new bootstrap.Dropdown(dropdownElement);
-                
-                // Store instance for later use
-                this.dropdownInstance = dropdownInstance;
-                
-                // Add Bootstrap dropdown event listeners for debugging
+                // Optional: Add event listeners for debugging
                 dropdownElement.addEventListener('show.bs.dropdown', () => {
-                    console.log('Bootstrap dropdown show event fired');
-                    
-                    // Check dropdown menu element
-                    const dropdownMenu = document.getElementById('workspace-dropdown-menu');
-                    if (dropdownMenu) {
-                        console.log('Dropdown menu element found');
-                        const styles = window.getComputedStyle(dropdownMenu);
-                        console.log('Dropdown menu display:', styles.display);
-                        console.log('Dropdown menu visibility:', styles.visibility);
-                        console.log('Dropdown menu opacity:', styles.opacity);
-                        console.log('Dropdown menu z-index:', styles.zIndex);
-                        console.log('Dropdown menu position:', styles.position);
-                    } else {
-                        console.log('Dropdown menu element NOT found');
-                    }
+                    console.log('Workspace dropdown is opening');
                 });
                 
                 dropdownElement.addEventListener('shown.bs.dropdown', () => {
-                    console.log('Bootstrap dropdown shown event fired');
-                    
-                    // Double-check after shown
-                    const dropdownMenu = document.getElementById('workspace-dropdown-menu');
-                    if (dropdownMenu) {
-                        const styles = window.getComputedStyle(dropdownMenu);
-                        console.log('After shown - display:', styles.display);
-                        console.log('After shown - visibility:', styles.visibility);
-                    }
+                    console.log('Workspace dropdown opened successfully');
                 });
                 
                 dropdownElement.addEventListener('hide.bs.dropdown', () => {
-                    console.log('Bootstrap dropdown hide event fired');
+                    console.log('Workspace dropdown is closing');
                 });
-                
-                console.log('Bootstrap dropdown initialized successfully');
-                
-                /*
-                // Add a manual test button for debugging
-                setTimeout(() => {
-                    console.log('Testing manual dropdown toggle...');
-                    try {
-                        dropdownInstance.show();
-                        console.log('Manual dropdown.show() called successfully');
-                        
-                        setTimeout(() => {
-                            dropdownInstance.hide();
-                            console.log('Manual dropdown.hide() called successfully');
-                        }, 2000);
-                    } catch (error) {
-                        console.error('Error in manual dropdown test:', error);
-                    }
-                }, 1000);
-                */
             } else {
-                console.error('Workspace dropdown element not found for initialization');
+                console.error('Workspace dropdown element not found');
             }
         }, 100);
     },

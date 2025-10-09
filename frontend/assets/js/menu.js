@@ -86,47 +86,8 @@ window.Menu = {
             this.toggleSidebarCollapse();
         });
         
-        // User dropdown toggle - use custom class instead of Bootstrap data attribute
-        $(document).on('click', '.user-dropdown-trigger', (e) => {
-            e.preventDefault();
-            const $trigger = $(e.currentTarget);
-            const targetSelector = $trigger.attr('data-dropdown-target');
-            const $dropdown = $trigger.next(targetSelector);
-            
-            Utils.log('User dropdown toggle clicked:', $trigger.attr('id'));
-            Utils.log('Target selector:', targetSelector);
-            
-            if ($dropdown.length === 0) {
-                Utils.log('Dropdown menu not found for selector:', targetSelector);
-                return;
-            }
-            
-            // Close other dropdowns first
-            $('.dropdown-menu.show').not($dropdown).removeClass('show');
-            $('.user-dropdown-trigger').not($trigger).attr('aria-expanded', 'false');
-            
-            // Toggle current dropdown
-            const isCurrentlyOpen = $dropdown.hasClass('show');
-            Utils.log('Dropdown currently open:', isCurrentlyOpen);
-            
-            if (isCurrentlyOpen) {
-                $dropdown.removeClass('show');
-                $trigger.attr('aria-expanded', 'false');
-                Utils.log('Dropdown closed');
-            } else {
-                $dropdown.addClass('show');
-                $trigger.attr('aria-expanded', 'true');
-                Utils.log('Dropdown opened');
-            }
-        });
-        
-        // Close dropdown when clicking outside
-        $(document).on('click', (e) => {
-            if (!$(e.target).closest('.dropdown').length) {
-                $('.dropdown-menu.show').removeClass('show');
-                $('.user-dropdown-trigger').attr('aria-expanded', 'false');
-            }
-        });
+        // Note: User dropdown now uses Bootstrap dropdown functionality
+        // No custom handling needed - Bootstrap handles it automatically
     },
     
     /**
