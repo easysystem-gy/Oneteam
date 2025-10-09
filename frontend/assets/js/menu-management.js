@@ -6,6 +6,7 @@
 const MenuManagement = {
     currentMenuItems: [],
     selectedMenuItem: null,
+    currentView: 'table', // 'table' or 'tree'
     
     /**
      * Initialize the menu management module
@@ -24,6 +25,23 @@ const MenuManagement = {
         $(document).on('click', '#add-menu-item-btn', (e) => {
             e.preventDefault();
             this.showAddMenuItemModal();
+        });
+        
+        // Refresh menu button
+        $(document).on('click', '#refresh-menu-btn', (e) => {
+            e.preventDefault();
+            this.loadMenuItems();
+        });
+        
+        // View toggle buttons
+        $(document).on('click', '#view-tree-btn', (e) => {
+            e.preventDefault();
+            this.switchToTreeView();
+        });
+        
+        $(document).on('click', '#view-table-btn', (e) => {
+            e.preventDefault();
+            this.switchToTableView();
         });
         
         // Edit menu item
@@ -76,6 +94,7 @@ const MenuManagement = {
             success: (response) => {
                 console.log('Menu items loaded:', response);
                 this.currentMenuItems = response.menu_items || [];
+                this.updateStatistics();
                 this.renderMenuItems(response.hierarchical || []);
             },
             error: (xhr, status, error) => {
@@ -456,6 +475,161 @@ const MenuManagement = {
         } else {
             alert('Error: ' + message);
         }
+    },
+    
+    /**
+     * Update statistics cards
+     */
+    updateStatistics: function() {
+        const totalItems = this.currentMenuItems.length;
+        const activeItems = this.currentMenuItems.filter(item => item.is_active).length;
+        const parentItems = this.currentMenuItems.filter(item => !item.parent_id).length;
+        const childItems = this.currentMenuItems.filter(item => item.parent_id).length;
+        
+        $('#total-items-count').text(totalItems);
+        $('#active-items-count').text(activeItems);
+        $('#parent-items-count').text(parentItems);
+        $('#child-items-count').text(childItems);
+    },
+    
+    /**
+     * Switch to tree view
+     */
+    switchToTreeView: function() {
+        $('#view-tree-btn').addClass('active');
+        $('#view-table-btn').removeClass('active');
+        this.currentView = 'tree';
+        this.renderMenuItems(this.buildHierarchy(this.currentMenuItems));
+    },
+    
+    /**
+     * Switch to table view
+     */
+    switchToTableView: function() {
+        $('#view-table-btn').addClass('active');
+        $('#view-tree-btn').removeClass('active');
+        this.currentView = 'table';
+        this.renderMenuItemsTable();
+    },
+    
+    /**
+     * Build hierarchy from flat menu items
+     */
+    buildHierarchy: function(items, parentId = null) {
+        const hierarchy = [];
+        
+        items.forEach(item => {
+            if (item.parent_id == parentId) {
+                const children = this.buildHierarchy(items, item.id);
+                if (children.length > 0) {
+                    item.children = children;
+                }
+                hierarchy.push(item);
+            }
+        });
+        
+        return hierarchy;
+    },
+    
+    /**
+     * Render menu items in table view
+     */
+    renderMenuItemsTable: function() {
+        const container = $('#menu-items-container');
+        if (!container.length) {
+            console.error('Menu items container not found');
+            return;
+        }
+        
+        if (this.currentMenuItems.length === 0) {
+            container.html(`
+                <div class="text-center py-5">
+                    <i class="fas fa-bars fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No menu items found</h5>
+                    <p class="text-muted">Click "Add Menu Item" to create your first menu item.</p>
+                </div>
+            `);
+            return;
+        }
+        
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="50"><i class="fas fa-grip-vertical"></i></th>
+                            <th width="50">Icon</th>
+                            <th>Title</th>
+                            <th>Module/URL</th>
+                            <th width="100">Parent</th>
+                            <th width="80">Order</th>
+                            <th width="100">Status</th>
+                            <th width="80">Active</th>
+                            <th width="120">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sortable-menu-items">
+        `;
+        
+        // Sort items by sort_order
+        const sortedItems = [...this.currentMenuItems].sort((a, b) => a.sort_order - b.sort_order);
+        
+        sortedItems.forEach(item => {
+            const parentItem = this.currentMenuItems.find(p => p.id == item.parent_id);
+            const parentName = parentItem ? parentItem.title : '-';
+            const statusBadge = item.is_active ? 
+                '<span class="badge bg-success">Active</span>' : 
+                '<span class="badge bg-secondary">Inactive</span>';
+            
+            html += `
+                <tr class="menu-item-row" data-menu-id="${item.id}">
+                    <td><i class="fas fa-grip-vertical text-muted drag-handle" style="cursor: move;"></i></td>
+                    <td><i class="${item.icon} fa-lg"></i></td>
+                    <td>
+                        <strong>${item.title}</strong>
+                        ${item.level > 0 ? '<small class="text-muted ms-2">(Child)</small>' : ''}
+                    </td>
+                    <td>
+                        ${item.module_name ? `<span class="badge bg-info">${item.module_name}</span>` : ''}
+                        ${item.url ? `<br><small class="text-muted">${item.url}</small>` : ''}
+                    </td>
+                    <td><small>${parentName}</small></td>
+                    <td><span class="badge bg-light text-dark">${item.sort_order}</span></td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input menu-item-active-toggle" 
+                                   type="checkbox" 
+                                   data-menu-id="${item.id}"
+                                   ${item.is_active ? 'checked' : ''}>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary edit-menu-item" 
+                                    data-menu-id="${item.id}" 
+                                    title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger delete-menu-item" 
+                                    data-menu-id="${item.id}" 
+                                    title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        container.html(html);
+        this.initializeSortable();
     }
 };
 
