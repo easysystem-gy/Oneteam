@@ -79,7 +79,8 @@ INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name,
 ('dashboard-uuid', 1, NULL, 'Dashboard', 'fas fa-tachometer-alt', 'dashboard', 1),
 ('users-uuid', 1, NULL, 'User Management', 'fas fa-users', NULL, 2),
 ('reports-uuid', 1, NULL, 'Reports', 'fas fa-chart-bar', 'reports', 3),
-('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 4)
+('system-uuid', 1, NULL, 'System', 'fas fa-server', NULL, 4),
+('settings-uuid', 1, NULL, 'Settings', 'fas fa-cog', 'settings', 5)
 ON CONFLICT (uuid) DO NOTHING;
 
 -- Then insert child items using subquery to get parent ID
@@ -88,6 +89,7 @@ INSERT INTO menu_items (uuid, workspace_id, parent_id, title, icon, module_name,
 ('users-roles-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'users-uuid'), 'User Roles', 'fas fa-user-tag', 'users/roles', 2),
 ('reports-sales-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Sales Reports', 'fas fa-chart-line', 'reports/sales', 1),
 ('reports-analytics-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'reports-uuid'), 'Analytics', 'fas fa-chart-pie', 'reports/analytics', 2),
+('system-menu-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'system-uuid'), 'Menu Management', 'fas fa-bars', 'system/menu', 1),
 ('settings-workspace-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'Workspace Settings', 'fas fa-building', 'workspaces/settings', 1),
 ('settings-general-uuid', 1, (SELECT id FROM menu_items WHERE uuid = 'settings-uuid'), 'General Settings', 'fas fa-cogs', 'general-settings', 2)
 ON CONFLICT (uuid) DO NOTHING;
