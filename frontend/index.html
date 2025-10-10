@@ -95,13 +95,14 @@
                 
                 <!-- Workspace Selector -->
                 <div class="navbar-nav me-auto">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle workspace-dropdown-trigger" href="#" id="workspaceDropdown" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="nav-item custom-dropdown">
+                        <a class="nav-link custom-dropdown-trigger workspace-dropdown-trigger" href="#" id="workspaceDropdown" 
+                           data-custom-dropdown="workspace-dropdown-menu">
                             <i id="current-workspace-icon" class="fas fa-briefcase me-2"></i>
                             <span id="current-workspace-name">Select Workspace</span>
+                            <i class="fas fa-chevron-down ms-2" style="font-size: 0.75rem;"></i>
                         </a>
-                        <ul class="dropdown-menu workspace-dropdown-menu" id="workspace-dropdown-menu" aria-labelledby="workspaceDropdown">
+                        <ul class="custom-dropdown-menu workspace-dropdown-menu" id="workspace-dropdown-menu">
                             <li class="dropdown-header">Available Workspaces</li>
                             <!-- Workspaces will be loaded here -->
                         </ul>
@@ -109,13 +110,14 @@
                 </div>
                 
                 <div class="navbar-nav ms-auto">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="nav-item custom-dropdown">
+                        <a class="nav-link custom-dropdown-trigger" href="#" id="userDropdown" 
+                           data-custom-dropdown="user-dropdown-menu">
                             <i class="fas fa-user-circle me-2"></i>
                             <span id="current-user-name">User</span>
+                            <i class="fas fa-chevron-down ms-2" style="font-size: 0.75rem;"></i>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <ul class="custom-dropdown-menu dropdown-menu-end" id="user-dropdown-menu">
                             <li><a class="dropdown-item" href="#" onclick="App.showProfile()">
                                 <i class="fas fa-user me-2"></i>Profile
                             </a></li>
@@ -181,6 +183,7 @@
     <!-- Custom JavaScript -->
     <script src="frontend/assets/js/config.js"></script>
     <script src="frontend/assets/js/utils.js"></script>
+    <script src="frontend/assets/js/custom-dropdown.js"></script>
     <script src="frontend/assets/js/auth.js"></script>
     <script src="frontend/assets/js/workspace.js"></script>
     <script src="frontend/assets/js/menu.js"></script>

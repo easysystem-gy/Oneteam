@@ -27,23 +27,19 @@ window.Workspace = {
      * Initialize Bootstrap dropdown
      */
     initializeDropdown: function() {
-        // Bootstrap dropdowns work automatically with data-bs-toggle="dropdown"
+        // Custom dropdowns work automatically with data-custom-dropdown attribute
         // Just add event listeners for debugging if needed
         setTimeout(() => {
             const dropdownElement = document.getElementById('workspaceDropdown');
             if (dropdownElement) {
-                console.log('Workspace dropdown element found - Bootstrap will handle it automatically');
+                console.log('Workspace dropdown element found - Custom dropdown will handle it');
                 
-                // Optional: Add event listeners for debugging
-                dropdownElement.addEventListener('show.bs.dropdown', () => {
+                // Add event listeners for custom dropdown events
+                dropdownElement.addEventListener('dropdown:show', () => {
                     console.log('Workspace dropdown is opening');
                 });
                 
-                dropdownElement.addEventListener('shown.bs.dropdown', () => {
-                    console.log('Workspace dropdown opened successfully');
-                });
-                
-                dropdownElement.addEventListener('hide.bs.dropdown', () => {
+                dropdownElement.addEventListener('dropdown:hide', () => {
                     console.log('Workspace dropdown is closing');
                 });
             } else {
@@ -299,12 +295,14 @@ window.Workspace = {
         setTimeout(() => {
             this.setCurrentWorkspace(workspaceId);
             
-            // Close Bootstrap dropdown
-            if (this.dropdownInstance) {
-                console.log('Closing dropdown after workspace switch');
-                this.dropdownInstance.hide();
-            } else {
-                console.log('No dropdown instance found to close');
+            // Close custom dropdown
+            const dropdownElement = document.getElementById('workspaceDropdown');
+            if (dropdownElement) {
+                const dropdown = CustomDropdown.instances.find(d => d.trigger === dropdownElement);
+                if (dropdown && dropdown.isOpen) {
+                    console.log('Closing dropdown after workspace switch');
+                    dropdown.close();
+                }
             }
             
             // Reload menu for new workspace
