@@ -101,7 +101,8 @@ switch ($endpoint) {
         if (file_exists(__DIR__ . '/openapi.json') && filesize(__DIR__ . '/openapi.json') > 0) {
             readfile(__DIR__ . '/openapi.json');
         } else {
-            include 'openapi.php';
+            // Temporarily use minimal version for testing
+            include 'openapi_minimal.php';
             echo json_encode($openapi, JSON_PRETTY_PRINT);
         }
         exit();
