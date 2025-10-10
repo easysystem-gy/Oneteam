@@ -3,7 +3,7 @@
     "info": {
         "title": "Oneteam API",
         "version": "1.0.0",
-        "description": "Modern one-page web application API for team management and collaboration. Built with PHP backend and PostgreSQL database.",
+        "description": "Modern one-page web application API for team management and collaboration. Built with PHP backend and PostgreSQL database with support for multiple database systems including MariaDB, SQL Server, and SQLite.",
         "contact": {
             "name": "Oneteam Development Team",
             "email": "dev@oneteam.local"
@@ -17,12 +17,20 @@
         {
             "url": "/api",
             "description": "Development server"
+        },
+        {
+            "url": "http://localhost/api",
+            "description": "Local development server"
         }
     ],
     "tags": [
         {
             "name": "Authentication",
             "description": "User authentication and session management"
+        },
+        {
+            "name": "Profile",
+            "description": "User profile management and preferences"
         },
         {
             "name": "Workspaces",
@@ -34,7 +42,7 @@
         },
         {
             "name": "Users",
-            "description": "User management and profiles"
+            "description": "User management and administration"
         },
         {
             "name": "Tasks",
@@ -57,11 +65,13 @@
                                 "properties": {
                                     "username": {
                                         "type": "string",
-                                        "description": "User's username or email"
+                                        "description": "User's username or email",
+                                        "example": "admin"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "description": "User's password"
+                                        "description": "User's password",
+                                        "example": "admin123"
                                     }
                                 }
                             }
@@ -76,17 +86,550 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "success": {"type": "boolean"},
-                                        "message": {"type": "string"},
-                                        "user": {"$ref": "#/components/schemas/User"},
-                                        "token": {"type": "string"}
+                                        "success": {"type": "boolean", "example": true},
+                                        "message": {"type": "string", "example": "Login successful"},
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "token": {"type": "string", "example": "demo-jwt-token-1234567890"},
+                                                "user": {"$ref": "#/components/schemas/User"},
+                                                "expires_at": {"type": "string", "format": "date-time"}
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Invalid credentials"
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": ["Authentication"],
+                "summary": "User logout",
+                "description": "Logout user and invalidate session",
+                "security": [{"bearerAuth": []}],
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {"type": "boolean", "example": true},
+                                        "message": {"type": "string", "example": "Logout successful"}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/profile": {
+            "get": {
+                "tags": ["Authentication"],
+                "summary": "Get authentication profile",
+                "description": "Get current user profile with workspace information",
+                "security": [{"bearerAuth": []}],
+                "responses": {
+                    "200": {
+                        "description": "Profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {"type": "boolean", "example": true},
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "token": {"type": "string"},
+                                                "user": {"$ref": "#/components/schemas/User"},
+                                                "workspace": {"$ref": "#/components/schemas/Workspace"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "tags": ["Profile"],
+                "summary": "Get user profile",
+                "description": "Get detailed user profile information",
+                "security": [{"bearerAuth": []}],
+                "responses": {
+                    "200": {
+                        "description": "Profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {"type": "boolean", "example": true},
+                                        "data": {"$ref": "#/components/schemas/UserProfile"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/update": {
+            "put": {
+                "tags": ["Profile"],
+                "summary": "Update user profile",
+                "description": "Update user profile information",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": "#/components/schemas/ProfileUpdate"}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/avatar": {
+            "post": {
+                "tags": ["Profile"],
+                "summary": "Upload profile avatar",
+                "description": "Upload or update user profile avatar",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "avatar": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "description": "Avatar image file"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Avatar uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid file",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/password": {
+            "put": {
+                "tags": ["Profile"],
+                "summary": "Change password",
+                "description": "Change user password",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["current_password", "new_password"],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "description": "Current password"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "description": "New password",
+                                        "minLength": 8
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "description": "Confirm new password"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/preferences": {
+            "put": {
+                "tags": ["Profile"],
+                "summary": "Update user preferences",
+                "description": "Update user preferences and settings",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": "#/components/schemas/UserPreferences"}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Preferences updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspaces": {
+            "get": {
+                "tags": ["Workspaces"],
+                "summary": "List workspaces",
+                "description": "Get list of all available workspaces for the current user",
+                "security": [{"bearerAuth": []}],
+                "responses": {
+                    "200": {
+                        "description": "Workspaces retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {"type": "boolean", "example": true},
+                                        "data": {
+                                            "type": "array",
+                                            "items": {"$ref": "#/components/schemas/Workspace"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Workspaces"],
+                "summary": "Create workspace",
+                "description": "Create a new workspace",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": "#/components/schemas/WorkspaceCreate"}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Workspace created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {"type": "boolean", "example": true},
+                                        "message": {"type": "string"},
+                                        "data": {"$ref": "#/components/schemas/Workspace"}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Workspaces"],
+                "summary": "Update workspace",
+                "description": "Update an existing workspace",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": "#/components/schemas/WorkspaceUpdate"}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Workspace updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Workspaces"],
+                "summary": "Delete workspace",
+                "description": "Delete a workspace",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["id"],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "description": "Workspace ID to delete"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Workspace deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/menu": {
+            "get": {
+                "tags": ["Menu"],
+                "summary": "Get menu items",
+                "description": "Retrieve menu structure for the current workspace",
+                "security": [{"bearerAuth": []}],
+                "parameters": [
+                    {
+                        "name": "workspace_id",
+                        "in": "query",
+                        "schema": {"type": "integer"},
+                        "description": "Workspace ID (optional, defaults to current workspace)"
+                    },
+                    {
+                        "name": "parent_id",
+                        "in": "query",
+                        "schema": {"type": "integer"},
+                        "description": "Parent menu ID for hierarchical structure"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Menu items retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {"type": "boolean", "example": true},
+                                        "data": {
+                                            "type": "array",
+                                            "items": {"$ref": "#/components/schemas/MenuItem"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Menu"],
+                "summary": "Create menu item",
+                "description": "Create a new menu item",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": "#/components/schemas/MenuItemCreate"}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Menu item created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Menu"],
+                "summary": "Update menu item",
+                "description": "Update an existing menu item",
+                "security": [{"bearerAuth": []}],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": "#/components/schemas/MenuItemUpdate"}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Menu item updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Menu"],
+                "summary": "Delete menu item",
+                "description": "Delete a menu item",
+                "security": [{"bearerAuth": []}],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {"type": "integer"},
+                        "description": "Menu item ID to delete"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Menu item deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ApiResponse"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": ["Users"],
+                "summary": "List users",
+                "description": "Get list of all users (Admin only)",
+                "security": [{"bearerAuth": []}],
+                "responses": {
+                    "200": {
+                        "description": "Users retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {"type": "boolean", "example": true},
+                                        "data": {
+                                            "type": "array",
+                                            "items": {"$ref": "#/components/schemas/User"}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "501": {
+                        "description": "Not implemented",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                            }
+                        }
                     }
                 }
             }
@@ -265,21 +808,184 @@
                 "properties": {
                     "id": {
                         "type": "integer",
-                        "description": "User ID"
+                        "description": "User ID",
+                        "example": 1
                     },
                     "username": {
                         "type": "string",
-                        "description": "Username"
+                        "description": "Username",
+                        "example": "admin"
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "description": "User email"
+                        "description": "User email",
+                        "example": "admin@oneteam.local"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "description": "First name",
+                        "example": "System"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "description": "Last name",
+                        "example": "Administrator"
+                    },
+                    "is_admin": {
+                        "type": "boolean",
+                        "description": "Admin status",
+                        "example": true
                     },
                     "workspace_id": {
                         "type": "integer",
-                        "description": "Current workspace ID"
+                        "description": "Current workspace ID",
+                        "example": 1
                     }
+                }
+            },
+            "UserProfile": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer", "example": 1},
+                    "uuid": {"type": "string", "example": "admin-uuid-123456"},
+                    "username": {"type": "string", "example": "admin"},
+                    "email": {"type": "string", "format": "email", "example": "admin@oneteam.local"},
+                    "first_name": {"type": "string", "example": "System"},
+                    "last_name": {"type": "string", "example": "Administrator"},
+                    "phone": {"type": "string", "example": "+1-555-0123"},
+                    "bio": {"type": "string", "example": "System administrator with full access to all features."},
+                    "avatar": {"type": "string", "example": "/api/uploads/avatars/admin.jpg"},
+                    "timezone": {"type": "string", "example": "UTC"},
+                    "language": {"type": "string", "example": "en"},
+                    "theme": {"type": "string", "enum": ["light", "dark"], "example": "light"},
+                    "date_format": {"type": "string", "example": "Y-m-d"},
+                    "time_format": {"type": "string", "example": "H:i:s"},
+                    "notifications_email": {"type": "boolean", "example": true},
+                    "notifications_browser": {"type": "boolean", "example": true},
+                    "two_factor_enabled": {"type": "boolean", "example": false},
+                    "email_verified": {"type": "boolean", "example": true},
+                    "is_active": {"type": "boolean", "example": true},
+                    "is_admin": {"type": "boolean", "example": true},
+                    "last_login": {"type": "string", "format": "date-time", "example": "2024-10-08T08:00:00Z"},
+                    "created_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"},
+                    "updated_at": {"type": "string", "format": "date-time", "example": "2024-10-08T08:00:00Z"}
+                }
+            },
+            "ProfileUpdate": {
+                "type": "object",
+                "properties": {
+                    "first_name": {"type": "string", "example": "John"},
+                    "last_name": {"type": "string", "example": "Doe"},
+                    "phone": {"type": "string", "example": "+1-555-0123"},
+                    "bio": {"type": "string", "example": "Updated bio"},
+                    "timezone": {"type": "string", "example": "America/New_York"},
+                    "language": {"type": "string", "example": "en"},
+                    "theme": {"type": "string", "enum": ["light", "dark"], "example": "dark"},
+                    "date_format": {"type": "string", "example": "m/d/Y"},
+                    "time_format": {"type": "string", "example": "g:i A"},
+                    "notifications_email": {"type": "boolean", "example": false},
+                    "notifications_browser": {"type": "boolean", "example": true}
+                }
+            },
+            "UserPreferences": {
+                "type": "object",
+                "properties": {
+                    "theme": {"type": "string", "enum": ["light", "dark"], "example": "dark"},
+                    "language": {"type": "string", "example": "en"},
+                    "timezone": {"type": "string", "example": "UTC"},
+                    "date_format": {"type": "string", "example": "Y-m-d"},
+                    "time_format": {"type": "string", "example": "H:i:s"},
+                    "notifications_email": {"type": "boolean", "example": true},
+                    "notifications_browser": {"type": "boolean", "example": true},
+                    "dashboard_layout": {"type": "string", "example": "grid"},
+                    "items_per_page": {"type": "integer", "example": 25}
+                }
+            },
+            "Workspace": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer", "example": 1},
+                    "uuid": {"type": "string", "example": "workspace-uuid-123456"},
+                    "name": {"type": "string", "example": "Default Workspace"},
+                    "description": {"type": "string", "example": "Default workspace for all users"},
+                    "color": {"type": "string", "example": "#0d6efd"},
+                    "icon": {"type": "string", "example": "fas fa-home"},
+                    "is_active": {"type": "boolean", "example": true},
+                    "is_default": {"type": "boolean", "example": true},
+                    "user_role": {"type": "string", "enum": ["admin", "developer", "member"], "example": "admin"},
+                    "created_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"},
+                    "updated_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"}
+                }
+            },
+            "WorkspaceCreate": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                    "name": {"type": "string", "example": "New Workspace"},
+                    "description": {"type": "string", "example": "Description of the new workspace"},
+                    "color": {"type": "string", "example": "#28a745"},
+                    "icon": {"type": "string", "example": "fas fa-briefcase"},
+                    "is_active": {"type": "boolean", "example": true}
+                }
+            },
+            "WorkspaceUpdate": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                    "id": {"type": "integer", "example": 1},
+                    "name": {"type": "string", "example": "Updated Workspace"},
+                    "description": {"type": "string", "example": "Updated description"},
+                    "color": {"type": "string", "example": "#dc3545"},
+                    "icon": {"type": "string", "example": "fas fa-edit"},
+                    "is_active": {"type": "boolean", "example": false}
+                }
+            },
+            "MenuItem": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer", "example": 1},
+                    "uuid": {"type": "string", "example": "dashboard-uuid"},
+                    "workspace_id": {"type": "integer", "example": 1},
+                    "parent_id": {"type": "integer", "nullable": true, "example": null},
+                    "title": {"type": "string", "example": "Dashboard"},
+                    "icon": {"type": "string", "example": "fas fa-tachometer-alt"},
+                    "url": {"type": "string", "nullable": true, "example": "dashboard"},
+                    "sort_order": {"type": "integer", "example": 1},
+                    "level": {"type": "integer", "example": 0},
+                    "is_active": {"type": "boolean", "example": true},
+                    "created_at": {"type": "string", "format": "date-time"},
+                    "updated_at": {"type": "string", "format": "date-time"},
+                    "children": {
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/MenuItem"}
+                    }
+                }
+            },
+            "MenuItemCreate": {
+                "type": "object",
+                "required": ["title", "workspace_id"],
+                "properties": {
+                    "workspace_id": {"type": "integer", "example": 1},
+                    "parent_id": {"type": "integer", "nullable": true, "example": null},
+                    "title": {"type": "string", "example": "New Menu Item"},
+                    "icon": {"type": "string", "example": "fas fa-star"},
+                    "url": {"type": "string", "nullable": true, "example": "new-page"},
+                    "sort_order": {"type": "integer", "example": 1},
+                    "is_active": {"type": "boolean", "example": true}
+                }
+            },
+            "MenuItemUpdate": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                    "id": {"type": "integer", "example": 1},
+                    "parent_id": {"type": "integer", "nullable": true, "example": null},
+                    "title": {"type": "string", "example": "Updated Menu Item"},
+                    "icon": {"type": "string", "example": "fas fa-edit"},
+                    "url": {"type": "string", "nullable": true, "example": "updated-page"},
+                    "sort_order": {"type": "integer", "example": 2},
+                    "is_active": {"type": "boolean", "example": false}
                 }
             },
             "Task": {
