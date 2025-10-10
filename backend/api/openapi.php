@@ -694,5 +694,5 @@ $openapi = [
     ]
 ];
 
-// Output the OpenAPI specification as JSON
-echo json_encode($openapi, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+// Note: $openapi array is available for use
+// JSON output is handled by the calling script
