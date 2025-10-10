@@ -43,6 +43,10 @@ $openapi = [
         [
             'name' => 'Users',
             'description' => 'User management and profiles'
+        ],
+        [
+            'name' => 'Tasks',
+            'description' => 'Task management and tracking'
         ]
     ],
     'paths' => [

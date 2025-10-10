@@ -651,3 +651,152 @@ function handleProfile($action, $method, $input)
             errorResponse('Profile action not found', 404);
     }
 }
+
+/**
+ * Handle tasks endpoint
+ */
+function handleTasks($action, $method, $input) {
+    switch ($action) {
+        case 'list':
+        case '':
+            if ($method === 'GET') {
+                // Get all tasks
+                jsonResponse([
+                    'success' => true,
+                    'data' => [
+                        [
+                            'id' => 1, 
+                            'title' => 'Setup Development Environment', 
+                            'description' => 'Configure local development environment for the project',
+                            'status' => 'completed',
+                            'created_at' => '2024-01-15 10:30:00'
+                        ],
+                        [
+                            'id' => 2, 
+                            'title' => 'Design Database Schema', 
+                            'description' => 'Create database tables and relationships',
+                            'status' => 'in_progress',
+                            'created_at' => '2024-01-16 14:20:00'
+                        ],
+                        [
+                            'id' => 3, 
+                            'title' => 'Implement User Authentication', 
+                            'description' => 'Build login and registration functionality',
+                            'status' => 'pending',
+                            'created_at' => '2024-01-17 09:15:00'
+                        ]
+                    ]
+                ]);
+            } else {
+                errorResponse('Method not allowed', 405);
+            }
+            break;
+            
+        case 'create':
+            if ($method === 'POST') {
+                // Create new task
+                $title = $input['title'] ?? '';
+                $description = $input['description'] ?? '';
+                $status = $input['status'] ?? 'pending';
+                
+                if (empty($title)) {
+                    errorResponse('Title is required', 400);
+                }
+                
+                // Validate status
+                $validStatuses = ['pending', 'in_progress', 'completed'];
+                if (!in_array($status, $validStatuses)) {
+                    errorResponse('Invalid status. Must be one of: ' . implode(', ', $validStatuses), 400);
+                }
+                
+                // Here you would save to database
+                jsonResponse([
+                    'success' => true,
+                    'message' => 'Task created successfully',
+                    'data' => [
+                        'id' => rand(1000, 9999),
+                        'title' => $title,
+                        'description' => $description,
+                        'status' => $status,
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]
+                ]);
+            } else {
+                errorResponse('Method not allowed', 405);
+            }
+            break;
+            
+        default:
+            if (is_numeric($action)) {
+                // Handle specific task ID
+                $taskId = (int)$action;
+                
+                switch ($method) {
+                    case 'GET':
+                        // Get specific task
+                        jsonResponse([
+                            'success' => true,
+                            'data' => [
+                                'id' => $taskId,
+                                'title' => 'Task ' . $taskId,
+                                'description' => 'This is a sample task with ID ' . $taskId,
+                                'status' => 'pending',
+                                'created_at' => date('Y-m-d H:i:s')
+                            ]
+                        ]);
+                        break;
+                        
+                    case 'PUT':
+                        // Update task
+                        $title = $input['title'] ?? '';
+                        $description = $input['description'] ?? '';
+                        $status = $input['status'] ?? '';
+                        
+                        $updates = [];
+                        if (!empty($title)) $updates['title'] = $title;
+                        if (!empty($description)) $updates['description'] = $description;
+                        if (!empty($status)) {
+                            $validStatuses = ['pending', 'in_progress', 'completed'];
+                            if (!in_array($status, $validStatuses)) {
+                                errorResponse('Invalid status. Must be one of: ' . implode(', ', $validStatuses), 400);
+                            }
+                            $updates['status'] = $status;
+                        }
+                        
+                        if (empty($updates)) {
+                            errorResponse('No valid fields to update', 400);
+                        }
+                        
+                        jsonResponse([
+                            'success' => true,
+                            'message' => 'Task updated successfully',
+                            'data' => array_merge([
+                                'id' => $taskId,
+                                'title' => 'Updated Task ' . $taskId,
+                                'description' => 'This task has been updated',
+                                'status' => 'in_progress',
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ], $updates)
+                        ]);
+                        break;
+                        
+                    case 'DELETE':
+                        // Delete task
+                        jsonResponse([
+                            'success' => true,
+                            'message' => 'Task deleted successfully',
+                            'data' => [
+                                'id' => $taskId,
+                                'deleted_at' => date('Y-m-d H:i:s')
+                            ]
+                        ]);
+                        break;
+                        
+                    default:
+                        errorResponse('Method not allowed', 405);
+                }
+            } else {
+                errorResponse('Invalid action: ' . $action, 404);
+            }
+    }
+}
