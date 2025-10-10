@@ -80,7 +80,7 @@
             }
         }
         
-        // Add click event listener for debugging
+        // Add click event listener for debugging (capture phase to not interfere)
         dropdownElement.addEventListener('click', function(e) {
             console.log('=== DROPDOWN CLICK EVENT ===');
             console.log('- Event target:', e.target);
@@ -89,33 +89,42 @@
             console.log('- Propagation stopped:', e.cancelBubble);
             console.log('- Event type:', e.type);
             console.log('- Event timestamp:', e.timeStamp);
+            console.log('- Current aria-expanded:', dropdownElement.getAttribute('aria-expanded'));
+            console.log('- Current menu show class:', dropdownMenu.classList.contains('show'));
             
-            // Check if Bootstrap is handling the event
+            // Check if Bootstrap is handling the event after a delay
             setTimeout(function() {
                 const isExpanded = dropdownElement.getAttribute('aria-expanded') === 'true';
                 const menuHasShow = dropdownMenu.classList.contains('show');
                 console.log('After click - aria-expanded:', isExpanded);
                 console.log('After click - menu has show class:', menuHasShow);
                 
-                if (!isExpanded && !menuHasShow) {
-                    console.error('❌ Dropdown did not open after click!');
+                // Only try manual toggle if dropdown should have opened but didn't
+                if (dropdownElement.getAttribute('aria-expanded') === 'false' && !menuHasShow) {
+                    console.log('🔍 Dropdown should have opened but didn\'t - checking if this was meant to be an open action');
                     
-                    // Try manual toggle
-                    console.log('Attempting manual toggle...');
-                    const instance = bootstrap.Dropdown.getInstance(dropdownElement);
-                    if (instance) {
-                        try {
-                            instance.toggle();
-                            console.log('✅ Manual toggle called');
-                        } catch (error) {
-                            console.error('❌ Manual toggle failed:', error);
+                    // Only auto-toggle if the dropdown was closed before the click
+                    const wasClosedBefore = !dropdownMenu.classList.contains('show');
+                    if (wasClosedBefore) {
+                        console.error('❌ Dropdown did not open after click!');
+                        
+                        // Try manual toggle
+                        console.log('Attempting manual toggle...');
+                        const instance = bootstrap.Dropdown.getInstance(dropdownElement);
+                        if (instance) {
+                            try {
+                                instance.toggle();
+                                console.log('✅ Manual toggle called');
+                            } catch (error) {
+                                console.error('❌ Manual toggle failed:', error);
+                            }
+                        } else {
+                            console.error('❌ No Bootstrap instance found for manual toggle');
                         }
-                    } else {
-                        console.error('❌ No Bootstrap instance found for manual toggle');
                     }
                 }
             }, 100);
-        });
+        }, true); // Use capture phase
         
         // Add Bootstrap event listeners
         dropdownElement.addEventListener('show.bs.dropdown', function() {
