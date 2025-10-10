@@ -259,11 +259,12 @@ body {
 }
 
 .content-area {
-    min-height: 100%;
+    /* min-height: 100%; */
+    height: calc(100vh - 72px);
     background: white;
-    border-radius: 10px;
-    margin: 1rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    /* border-radius: 10px; */
+    /* margin: 1rem; */
+    /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
 }
 
 /* Welcome Message */

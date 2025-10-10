@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Oneteam API OpenAPI 3.0 Specification
  * 
@@ -281,6 +282,158 @@ $openapi = [
                     ]
                 ]
             ]
+        ],
+        '/tasks' => [
+            'get' => [
+                'tags' => ['Tasks'],
+                'summary' => 'Get all tasks',
+                'description' => 'Retrieve a list of all tasks',
+                'responses' => [
+                    '200' => [
+                        'description' => 'List of tasks retrieved successfully',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean'],
+                                        'data' => [
+                                            'type' => 'array',
+                                            'items' => ['$ref' => '#/components/schemas/Task']
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        '/tasks/create' => [
+            'post' => [
+                'tags' => ['Tasks'],
+                'summary' => 'Create a new task',
+                'description' => 'Create a new task with title and description',
+                'requestBody' => [
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'required' => ['title'],
+                                'properties' => [
+                                    'title' => [
+                                        'type' => 'string',
+                                        'description' => 'Task title'
+                                    ],
+                                    'description' => [
+                                        'type' => 'string',
+                                        'description' => 'Task description'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Task created successfully',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean'],
+                                        'message' => ['type' => 'string'],
+                                        'data' => ['$ref' => '#/components/schemas/Task']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '400' => [
+                        'description' => 'Bad request - missing required fields'
+                    ]
+                ]
+            ]
+        ],
+        '/tasks/{id}' => [
+            'get' => [
+                'tags' => ['Tasks'],
+                'summary' => 'Get specific task',
+                'description' => 'Retrieve a specific task by ID',
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => ['type' => 'integer'],
+                        'description' => 'Task ID'
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Task retrieved successfully',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean'],
+                                        'data' => ['$ref' => '#/components/schemas/Task']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            'put' => [
+                'tags' => ['Tasks'],
+                'summary' => 'Update task',
+                'description' => 'Update an existing task',
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => ['type' => 'integer'],
+                        'description' => 'Task ID'
+                    ]
+                ],
+                'requestBody' => [
+                    'required' => true,
+                    'content' => [
+                        'application/json' => [
+                            'schema' => ['$ref' => '#/components/schemas/TaskUpdate']
+                        ]
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Task updated successfully'
+                    ]
+                ]
+            ],
+            'delete' => [
+                'tags' => ['Tasks'],
+                'summary' => 'Delete task',
+                'description' => 'Delete a specific task',
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => ['type' => 'integer'],
+                        'description' => 'Task ID'
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Task deleted successfully'
+                    ]
+                ]
+            ]
         ]
     ],
     'components' => [
@@ -488,10 +641,54 @@ $openapi = [
                     ]
                 ]
             ]
+        ],
+        'Task' => [
+            'type' => 'object',
+            'properties' => [
+                'id' => [
+                    'type' => 'integer',
+                    'description' => 'Task ID'
+                ],
+                'title' => [
+                    'type' => 'string',
+                    'description' => 'Task title'
+                ],
+                'description' => [
+                    'type' => 'string',
+                    'description' => 'Task description'
+                ],
+                'status' => [
+                    'type' => 'string',
+                    'enum' => ['pending', 'in_progress', 'completed'],
+                    'description' => 'Task status'
+                ],
+                'created_at' => [
+                    'type' => 'string',
+                    'format' => 'date-time',
+                    'description' => 'Creation timestamp'
+                ]
+            ]
+        ],
+        'TaskUpdate' => [
+            'type' => 'object',
+            'properties' => [
+                'title' => [
+                    'type' => 'string',
+                    'description' => 'Task title'
+                ],
+                'description' => [
+                    'type' => 'string',
+                    'description' => 'Task description'
+                ],
+                'status' => [
+                    'type' => 'string',
+                    'enum' => ['pending', 'in_progress', 'completed'],
+                    'description' => 'Task status'
+                ]
+            ]
         ]
     ]
 ];
 
 // Output the OpenAPI specification as JSON
 echo json_encode($openapi, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-?>
